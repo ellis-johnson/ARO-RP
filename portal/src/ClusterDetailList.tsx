@@ -7,11 +7,12 @@ interface ClusterDetailComponentProps {
   item: any
   clusterName: string
   isDataLoaded: boolean
-  detailPanelVisible: string
+  detailPanelSelected: string
 }
 
 interface IClusterDetailComponentState {
   item: IClusterDetails // why both state and props?
+  detailPanelSelected: string
 }
 
 export interface IClusterDetails {
@@ -123,8 +124,8 @@ export class ClusterDetailComponent extends Component<ClusterDetailComponentProp
 
   public render() {
     const headerEntries = Object.entries(clusterDetailHeadings)
-    switch (this.props.detailPanelVisible) {
-      case "Overview":
+    switch (this.props.detailPanelSelected.toLowerCase()) {
+      case "overview":
         {
           var filteredHeaders: Array<[string, any]> = []
           if (this.props.item.length != 0) {
@@ -175,7 +176,7 @@ export class ClusterDetailComponent extends Component<ClusterDetailComponentProp
             )
           }
         } break;
-      case "Nodes":
+      case "nodes":
         {
           return (
             <Stack styles={contentStackStylesNormal}>

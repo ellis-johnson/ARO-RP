@@ -34,6 +34,7 @@ const errorBarStyles: Partial<IMessageBarStyles> = { root: { marginBottom: 15 } 
 export function ClusterDetailPanel(props: {
   csrfToken: MutableRefObject<string>
   currentCluster: IClusterDetail
+  detailPanelSelected: string
   onClose: any // TODO: function ptr .. any probably bad
   loaded: string
 }) {
@@ -44,7 +45,6 @@ export function ClusterDetailPanel(props: {
   const [resourceID, setResourceID] = useState("")
   const [isOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false); // panel controls
   const [dataLoaded, setDataLoaded] = useState<boolean>(false);
-  const [detailPanelVisible, setdetailPanelVisible] = useState<string>("Overview");
 
   const errorBar = (): any => {
     return (
@@ -66,7 +66,7 @@ export function ClusterDetailPanel(props: {
   const updateData = (newData: any) => {
     setData(newData)
     if (state && state.current) {
-      state.current.setState({ item: newData })
+      state.current.setState({ item: newData, detailPanelSelected: props.detailPanelSelected })
     }
   }
 
@@ -92,7 +92,7 @@ export function ClusterDetailPanel(props: {
       setFetching("FETCHING")
       FetchClusterInfo(props.currentCluster.subscription, props.currentCluster.resource, props.currentCluster.clusterName).then(onData) // TODO: fetchClusterInfo accepts IClusterDetail
     }
-  }, [data, fetching, setFetching])
+  }, [data, props.currentCluster.clusterName, props.loaded])
 
 
   useEffect(() => {
@@ -111,7 +111,7 @@ export function ClusterDetailPanel(props: {
 
   function _onLinkClick(ev?: React.MouseEvent<HTMLElement>, item?: INavLink) {
     if (item && item.name !== '') {
-      setdetailPanelVisible(item.name)
+      props.detailPanelSelected = item.name
     }
   }
 
@@ -123,7 +123,7 @@ export function ClusterDetailPanel(props: {
         {
           name: 'Overview',
           key: 'overview',
-          url: '#' + history.location.pathname + "/overview",
+          url: '/overview',
           icon: 'ThisPC',
         },
       ],
@@ -159,7 +159,7 @@ export function ClusterDetailPanel(props: {
               item={data}
               clusterName={props.currentCluster.clusterName}
               isDataLoaded={dataLoaded}
-              detailPanelVisible={detailPanelVisible}
+              detailPanelSelected={props.detailPanelSelected}
             />
           </Stack.Item>
         </Stack>

@@ -29,10 +29,6 @@ import { KubeconfigButton } from "./Kubeconfig"
 import { AxiosResponse } from "axios"
 import { IClusterDetail } from "./App"
 
-var currentName: string
-var currentSubscription: string
-var currentResourceGroup: string
-
 registerIcons({
   icons: {
     'openshift-svg': (
@@ -180,6 +176,7 @@ class ClusterListComponent extends Component<ClusterListComponentProps, ICluster
         name: "Name",
         fieldName: "name",
         minWidth: 100,
+        maxWidth: 200,
         flexGrow: 10,
         isRowHeader: true,
         isResizable: true,
@@ -201,6 +198,7 @@ class ClusterListComponent extends Component<ClusterListComponentProps, ICluster
         name: "Subscription",
         fieldName: "subscription",
         minWidth: 100,
+        maxWidth: 300,
         flexGrow: 10,
         isRowHeader: true,
         isResizable: true,
@@ -217,7 +215,7 @@ class ClusterListComponent extends Component<ClusterListComponentProps, ICluster
         name: "Version",
         fieldName: "version",
         minWidth: 100,
-        flexGrow: 5,
+        flexGrow: 2,
         isRowHeader: true,
         isResizable: true,
         isSorted: true,
@@ -233,7 +231,7 @@ class ClusterListComponent extends Component<ClusterListComponentProps, ICluster
         name: "Last Modified",
         fieldName: "lastModified",
         minWidth: 100,
-        flexGrow: 5,
+        flexGrow: 2,
         isRowHeader: true,
         isResizable: true,
         isSorted: true,
@@ -249,7 +247,7 @@ class ClusterListComponent extends Component<ClusterListComponentProps, ICluster
         name: "Creation Date",
         fieldName: "createdDate",
         minWidth: 100,
-        flexGrow: 5,
+        flexGrow: 2,
         isRowHeader: true,
         isResizable: true,
         isSorted: true,
@@ -265,7 +263,7 @@ class ClusterListComponent extends Component<ClusterListComponentProps, ICluster
         name: "Provisioned By",
         fieldName: "provisionedBy",
         minWidth: 100,
-        flexGrow: 5,
+        flexGrow: 2,
         isRowHeader: true,
         isResizable: true,
         isSorted: true,
@@ -281,7 +279,7 @@ class ClusterListComponent extends Component<ClusterListComponentProps, ICluster
         name: "State",
         fieldName: "state",
         minWidth: 100,
-        flexGrow: 5,
+        flexGrow: 2,
         isRowHeader: true,
         isResizable: true,
         isSorted: true,
@@ -302,7 +300,7 @@ class ClusterListComponent extends Component<ClusterListComponentProps, ICluster
         name: "Actions",
         fieldName: "icons",
         minWidth: 92,
-        flexGrow: 5,
+        flexGrow: 2,
         isRowHeader: false,
         data: "string",
         isPadded: true,
@@ -386,7 +384,6 @@ class ClusterListComponent extends Component<ClusterListComponentProps, ICluster
           setKey="none"
           layoutMode={DetailsListLayoutMode.fixedColumns}
           isHeaderVisible={true}
-          onItemInvoked={this._onItemInvoked}
           styles={myStyle}
         />
       </Stack>
@@ -418,10 +415,6 @@ class ClusterListComponent extends Component<ClusterListComponentProps, ICluster
   private _onClusterInfoLinkClick(item: ICluster): void { // TODO: item ---- should not be any, create an interface or something.
     const thisCluster: IClusterDetail = {clusterName: item.name, subscription: item.subscription, resource: item.resourceGroup, resourceId: item.id}
     this._setCurrentCluster(thisCluster)
-  }
-
-  private _onItemInvoked(item: any): void {
-    alert(`Item invoked: ${item.name}`)
   }
 
   private _onColumnClick = (ev: React.MouseEvent<HTMLElement>, column: IColumn): void => {

@@ -106,18 +106,16 @@ export interface IClusterDetail {
 export const clusterRegex: RegExp = /^\/subscriptions\/(.*)\/resourceGroups\/(.*)\/providers\/Microsoft\.RedHatOpenShift\/openShiftClusters\/(.*)\/(\w+)/;
 
 export function checkRoute(history: string) {
-  console.log(history);
-  var output = clusterRegex.exec(history)
-
-  return output;
+  return clusterRegex.exec(history);
 }
 
 function App() {
   const [data, updateData] = useState({ location: "", csrf: "", elevated: false, username: "" })
   const [error, setError] = useState<AxiosResponse | null>(null)
   const [isOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false)
-  const [fetching, setFetching] = useState("")
+  const [CSRFStatus, setCSRFStatus] = useState("")
   const [currentCluster, setCurrentCluster] = useState<IClusterDetail>({ subscription: "", resource: "", clusterName: "", resourceId: "" }) // TODO: probably not best practice ... nullable reference?
+  const [detailPanelSelected, setDetailPanelSelected] = useState<string>("overview");
 
   const [contentStackStyles, setContentStackStyles] = useState<IStackStyles>(contentStackStylesNormal)
   const [showColumns, setShowColumns] = useState<Boolean>(true)
@@ -132,7 +130,10 @@ function App() {
     setCurrentCluster(clusterDetail)
     setContentStackStyles(contentStackStylesSmall)
     setShowColumns(false);
-    history.push(clusterDetail.resourceId)
+    var res = history.location.pathname.substring(1, clusterDetail.resourceId.length + 1)
+    if (res != clusterDetail.resourceId) {
+      history.push(clusterDetail.resourceId)
+    }
   }
 
   const _onCloseDetailPanel = () => {
@@ -149,19 +150,27 @@ function App() {
       } else {
         setError(result)
       }
-      setFetching("DONE")
+      setCSRFStatus("DONE")
     }
 
-    if (fetching === "") {
-      setFetching("FETCHING")
+    if (CSRFStatus === "") {
+      setCSRFStatus("FETCHING")
       FetchInfo().then(onData)
     }
-  }, [fetching, error, data])
+  }, [CSRFStatus, error, data])
 
   useEffect(() => {
     var routeObjs = checkRoute(history.location.pathname)
-    if (routeObjs != null) {
+    if (routeObjs != null && routeObjs.length == 5) {
 
+      const thisCluster: IClusterDetail = {
+        clusterName: routeObjs[3],
+        subscription: routeObjs[1],
+        resource: routeObjs[2],
+        resourceId: "subscriptions/" + routeObjs[1] + "/resourceGroups/" + routeObjs[2] + "/providers/Microsoft.RedHatOpenShift/openShiftClusters/" + routeObjs[3]
+      }
+      _setCurrentCluster(thisCluster)
+      setDetailPanelSelected(routeObjs[4])
     }
     console.log(routeObjs);
   }, [])
@@ -255,10 +264,10 @@ function App() {
         <Stack styles={contentStackStyles}>
           <Stack.Item grow>{error && errorBar()}</Stack.Item>
           <Stack.Item grow>
-            <ClusterList showColumns={showColumns} csrfToken={csrfRef} sshBox={sshRef} setCurrentCluster={_setCurrentCluster} loaded={fetching} />
+            <ClusterList showColumns={showColumns} csrfToken={csrfRef} sshBox={sshRef} setCurrentCluster={_setCurrentCluster} loaded={CSRFStatus} />
           </Stack.Item>
           <Stack.Item grow>
-            <ClusterDetailPanel csrfToken={csrfRef} loaded={fetching} currentCluster={currentCluster} onClose={_onCloseDetailPanel} />
+            <ClusterDetailPanel csrfToken={csrfRef} loaded={CSRFStatus} detailPanelSelected={detailPanelSelected} currentCluster={currentCluster} onClose={_onCloseDetailPanel} />
           </Stack.Item>
         </Stack>
         <SSHModal csrfToken={csrfRef} ref={sshRef} />
