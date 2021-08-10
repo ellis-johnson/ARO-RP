@@ -45,6 +45,7 @@ export function ClusterDetailPanel(props: {
   const [resourceID, setResourceID] = useState("")
   const [isOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false); // panel controls
   const [dataLoaded, setDataLoaded] = useState<boolean>(false);
+  const [detailPanelSelected, setPanelSelected] = useState(props.detailPanelSelected)
 
   const errorBar = (): any => {
     return (
@@ -109,13 +110,15 @@ export function ClusterDetailPanel(props: {
     }
   }, [props.currentCluster.clusterName])
 
+  useEffect(() => {
+    setPanelSelected(props.detailPanelSelected)
+  }, [props.detailPanelSelected, props.currentCluster])
+
   function _onLinkClick(ev?: React.MouseEvent<HTMLElement>, item?: INavLink) {
     if (item && item.name !== '') {
-      props.detailPanelSelected = item.name
+      setPanelSelected(item.name)
     }
   }
-
-  const history = useHistory();
 
   var navLinkGroups = [
     {
@@ -123,8 +126,14 @@ export function ClusterDetailPanel(props: {
         {
           name: 'Overview',
           key: 'overview',
-          url: '/overview',
+          url: '#' + props.currentCluster.resourceId + '/overview',
           icon: 'ThisPC',
+        },
+        {
+          name: 'Nodes',
+          key: 'nodes',
+          url: '#' + props.currentCluster.resourceId + '/nodes',
+          icon: 'BuildQueue',
         },
       ],
     },
@@ -150,7 +159,7 @@ export function ClusterDetailPanel(props: {
               ariaLabel="Select a tab to view"
               styles={navStyles}
               groups={navLinkGroups}
-              initialSelectedKey={"overview"}
+              initialSelectedKey={detailPanelSelected}
             />
           </Stack.Item>
           <Separator vertical />
@@ -159,7 +168,7 @@ export function ClusterDetailPanel(props: {
               item={data}
               clusterName={props.currentCluster.clusterName}
               isDataLoaded={dataLoaded}
-              detailPanelSelected={props.detailPanelSelected}
+              detailPanelSelected={detailPanelSelected}
             />
           </Stack.Item>
         </Stack>

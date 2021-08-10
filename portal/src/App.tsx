@@ -138,6 +138,7 @@ function App() {
 
   const _onCloseDetailPanel = () => {
     setContentStackStyles(contentStackStylesNormal)
+    setDetailPanelSelected("overview")
     setShowColumns(true);
     history.replace("")
   }
