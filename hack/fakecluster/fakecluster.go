@@ -87,6 +87,10 @@ func run(ctx context.Context, l *logrus.Entry) error {
 		"/apis/config.openshift.io/v1/clusteroperators",
 	).HandlerFunc(resp(cluster.MustAsset("clusteroperator.json")))
 
+	r.NewRoute().PathPrefix(
+		"/api/v1/nodes",
+	).HandlerFunc(resp(cluster.MustAsset("nodes.json")))
+
 	s := &http.Server{
 		Handler:     frontendmiddleware.Lowercase(r),
 		ReadTimeout: 10 * time.Second,

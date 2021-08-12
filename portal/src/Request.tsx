@@ -39,6 +39,16 @@ export const FetchInfo = async (): Promise<AxiosResponse | null> => {
   }
 }
 
+export const FetchNodes = async (subscription: string, resourceGroup: string, name: string): Promise<AxiosResponse | null> => {
+  try {
+    const result = await axios("/api/" + subscription + "/" + resourceGroup +  "/" + name + "/nodes")
+    return result
+  } catch (e) {
+    let err = e.response as AxiosResponse
+    return OnError(err)
+  }
+}
+
 export const ProcessLogOut = async (): Promise<any> => {
   try {
     const result = await axios({method: "POST", url: "/api/logout"})
