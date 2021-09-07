@@ -12,8 +12,8 @@ import (
 
 	"github.com/go-test/deep"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	corefake "k8s.io/client-go/kubernetes/fake"
+	kruntime "k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes/fake"
 
 	testlog "github.com/Azure/ARO-RP/test/util/log"
 )
@@ -30,12 +30,12 @@ func TestNodes(t *testing.T) {
 	}
 
 	// lol golang
-	converted := make([]runtime.Object, len(nodes.Items))
+	converted := make([]kruntime.Object, len(nodes.Items))
 	for i := range nodes.Items {
 		converted[i] = &nodes.Items[i]
 	}
 
-	kubernetes := corefake.NewSimpleClientset(converted...)
+	kubernetes := fake.NewSimpleClientset(converted...)
 
 	_, log := testlog.New()
 

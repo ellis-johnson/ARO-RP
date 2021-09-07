@@ -143,10 +143,10 @@ validate-go:
 	go test -tags e2e -run ^$$ ./test/e2e/...
 
 unit-test-go:
-	go run ./vendor/gotest.tools/gotestsum/main.go --format pkgname --junitfile report.xml -- -coverprofile=cover.out ./...
+	go run -tags containers_image_openpgp ./vendor/gotest.tools/gotestsum/main.go --format pkgname --junitfile report.xml -- -coverprofile=cover.out ./...
 
 lint-go:
-	go run ./vendor/github.com/golangci/golangci-lint/cmd/golangci-lint run
+	go run -tags containers_image_openpgp ./vendor/github.com/golangci/golangci-lint/cmd/golangci-lint run
 
 test-python: generate pyenv az
 	. pyenv/bin/activate && \
