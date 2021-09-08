@@ -7,7 +7,6 @@ import { FetchClusterInfo } from './Request';
 import { IClusterDetail, contentStackStylesNormal } from "./App"
 import { Nav, INavLink, INavLinkGroup, INavStyles } from '@fluentui/react/lib/Nav';
 import { ClusterDetailComponent } from './ClusterDetailList'
-import { useHistory } from "react-router-dom"
 
 
 const navStyles: Partial<INavStyles> = {
@@ -42,9 +41,7 @@ export function ClusterDetailPanel(props: {
   const [error, setError] = useState<AxiosResponse | null>(null)
   const state = useRef<ClusterDetailComponent>(null)
   const [fetching, setFetching] = useState("")
-  const [resourceID, setResourceID] = useState("")
   const [isOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false); // panel controls
-  const [dataLoaded, setDataLoaded] = useState<boolean>(false);
   const [detailPanelSelected, setPanelSelected] = useState(props.detailPanelSelected)
 
   const errorBar = (): any => {
@@ -75,14 +72,12 @@ export function ClusterDetailPanel(props: {
     dismissPanel()
     props.currentCluster.clusterName = ""
     props.onClose() // useEffect?
-    setDataLoaded(false);
   }
 
   useEffect(() => {
     const onData = (result: AxiosResponse | null) => {
       if (result?.status === 200) {
         updateData(result.data)
-        setDataLoaded(true);
       } else {
         setError(result)
       }
@@ -100,11 +95,9 @@ export function ClusterDetailPanel(props: {
     if (props.currentCluster.clusterName != "") {
       if (props.currentCluster.clusterName == fetching) {
         openPanel()
-        setDataLoaded(true);
       } else {
         setData([])
         setFetching("")
-        setDataLoaded(false); // activate shimmer
         openPanel()
       }
     }
@@ -148,7 +141,6 @@ export function ClusterDetailPanel(props: {
       isBlocking={false}
       styles={customPanelStyle}
       closeButtonAriaLabel="Close"
-      headerText={resourceID}
     >
       <Stack styles={contentStackStylesNormal}>
         <Stack.Item grow>{error && errorBar()}</Stack.Item>
@@ -167,7 +159,6 @@ export function ClusterDetailPanel(props: {
             <ClusterDetailComponent
               item={data}
               clusterName={props.currentCluster.clusterName}
-              isDataLoaded={dataLoaded}
               detailPanelSelected={detailPanelSelected}
             />
           </Stack.Item>
