@@ -23,6 +23,9 @@ const navStyles: Partial<INavStyles> = {
   }
 };
 
+export const overviewKey = "overview"
+export const nodesKey = "nodes"
+
 const customPanelStyle: Partial<IPanelStyles> = {
   root: { top: "40px", left: "225px" },
   content: { paddingLeft: 5, paddingRight: 5, },
@@ -108,23 +111,25 @@ export function ClusterDetailPanel(props: {
   }, [props.detailPanelSelected, props.currentCluster])
 
   function _onLinkClick(ev?: React.MouseEvent<HTMLElement>, item?: INavLink) {
-    if (item && item.name !== '') {
-      setPanelSelected(item.name)
+    if (item && item.key !== '') {
+      setPanelSelected(item.key!)
     }
   }
+
+
 
   var navLinkGroups = [
     {
       links: [
         {
           name: 'Overview',
-          key: 'overview',
+          key: overviewKey,
           url: '#' + props.currentCluster.resourceId + '/overview',
           icon: 'ThisPC',
         },
         {
           name: 'Nodes',
-          key: 'nodes',
+          key: nodesKey,
           url: '#' + props.currentCluster.resourceId + '/nodes',
           icon: 'BuildQueue',
         },
@@ -140,8 +145,7 @@ export function ClusterDetailPanel(props: {
       onDismiss={_dismissPanel}
       isBlocking={false}
       styles={customPanelStyle}
-      closeButtonAriaLabel="Close"
-    >
+      closeButtonAriaLabel="Close">
       <Stack styles={contentStackStylesNormal}>
         <Stack.Item grow>{error && errorBar()}</Stack.Item>
         <Stack horizontal>
@@ -158,9 +162,9 @@ export function ClusterDetailPanel(props: {
           <Stack.Item grow>
             <ClusterDetailComponent
               item={data}
-              clusterName={props.currentCluster.clusterName}
               detailPanelSelected={detailPanelSelected}
-            />
+              clusterInfo={props.currentCluster}
+              loaded={props.loaded}/>
           </Stack.Item>
         </Stack>
       </Stack>

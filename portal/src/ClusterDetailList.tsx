@@ -1,11 +1,13 @@
 import { Component } from "react"
-import { OverviewComponent } from './ClusterDetailListComponents/Overview';
+import { OverviewWrapper } from './ClusterDetailListComponents/OverviewWrapper';
 import { NodesComponent } from './ClusterDetailListComponents/Nodes';
+import { IClusterDetail } from "./App";
 
 interface ClusterDetailComponentProps {
   item: any
-  clusterName: string
+  clusterInfo: IClusterDetail
   detailPanelSelected: string
+  loaded: string
 }
 
 interface IClusterDetailComponentState {
@@ -45,13 +47,13 @@ export class ClusterDetailComponent extends Component<ClusterDetailComponentProp
       case "overview":
       {
         return (
-          <OverviewComponent item={this.props.item} clusterName={this.props.clusterName}/>
+          <OverviewWrapper currentCluster={this.props.clusterInfo} detailPanelSelected={this.props.detailPanelSelected} loaded={this.props.loaded}  />
         )
       }
       case "nodes":
         {
           return (
-            <NodesComponent item={this.props.item} clusterName={this.props.clusterName}/>
+            <NodesComponent item={this.props.item} clusterName={this.props.clusterInfo.clusterName}/>
           );
         }    }
   }
