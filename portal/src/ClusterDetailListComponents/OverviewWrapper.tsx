@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, MutableRefObject } from "react"
+import { useState, useEffect, useRef } from "react"
 import { AxiosResponse } from 'axios';
 import { FetchClusterInfo } from '../Request';
 import { IClusterDetail } from "../App"
