@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, MutableRefObject, Component, SyntheticEvent } from "react"
+import React, { useState, useEffect, useRef, MutableRefObject, Component } from "react"
 import {
   Stack,
   IconButton,
@@ -13,7 +13,6 @@ import {
   TooltipHost,
   TextField,
   Link,
-  ShimmeredDetailsList,
   registerIcons,
 } from "@fluentui/react"
 import {
@@ -24,7 +23,7 @@ import {
   IDetailsListStyles,
 } from "@fluentui/react/lib/DetailsList"
 
-import { FetchClusters, FetchClusterInfo } from "./Request"
+import { FetchClusters } from "./Request"
 import { KubeconfigButton } from "./Kubeconfig"
 import { AxiosResponse } from "axios"
 import { IClusterDetail } from "./App"
