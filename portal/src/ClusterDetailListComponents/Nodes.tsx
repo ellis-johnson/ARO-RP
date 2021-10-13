@@ -1,5 +1,6 @@
 import { Component } from "react"
-import { Stack, Text, mergeStyleSets, IColumn, IDetailsListStyles, TextField, DetailsList, SelectionMode, DetailsListLayoutMode, } from '@fluentui/react';
+import { Stack, Text, mergeStyleSets, IColumn, IDetailsListStyles, TextField, DetailsList, SelectionMode, DetailsListLayoutMode, StackItem, } from '@fluentui/react';
+import { Condition, INode, Taint } from "./NodesWrapper";
 
 interface NodesComponentProps {
     nodes: any
@@ -48,7 +49,7 @@ const classNames = mergeStyleSets({
 
 interface INodesState {
 columns: IColumn[]
-nodes: any[]
+nodes: INode[]
 }
 
 const nodeListStyles: Partial<IDetailsListStyles> = {
@@ -56,27 +57,49 @@ const nodeListStyles: Partial<IDetailsListStyles> = {
         marginTop: "-16px",
     },
 }
+
+const renderConditions = (conditions: Condition[]) => {
+    return conditions.map(condition => {
+      return <StackItem> 
+                <Stack>
+                    <StackItem><Text variant="large">{condition.type}</Text></StackItem>
+                    <Stack>
+                        <StackItem><Text variant="mediumPlus">Status</Text></StackItem>
+                        <StackItem>{condition.status}</StackItem>
+                    </Stack>
+                    <Stack>
+                        <StackItem><Text variant="mediumPlus">Last Heartbeat</Text></StackItem>
+                        <StackItem><Text>{condition.lastHeartbeatTime}</Text></StackItem>
+                    </Stack>
+                    <Stack>
+                        <StackItem><Text variant="mediumPlus">Last Transition</Text></StackItem>
+                        <StackItem>{condition.lastTransitionTime}</StackItem>
+                    </Stack>
+                    <Stack>
+                        <StackItem><Text variant="mediumPlus">Message</Text></StackItem>
+                        <StackItem>{condition.message}</StackItem>
+                    </Stack>
+                </Stack>
+             </StackItem>;
+    });
+  };
+
+  const renderTaints = (taints: Taint[]) => {
+    return taints.map(taint => {
+      return <StackItem>
+                <Stack>
+                    <StackItem><Text variant="large">{taint.key}</Text></StackItem>
+                    <StackItem>{taint.effect}</StackItem>
+                </Stack>
+             </StackItem>;
+    });
+  };
 export class NodesComponent extends Component<NodesComponentProps, INodesState> {
 
     constructor(props: NodesComponentProps) {
         super(props)
 
         const columns: IColumn[] = [
-        {
-            key: "status",
-            name: "Status",
-            fieldName: "",
-            minWidth: 24,
-            isRowHeader: false,
-            data: "string",
-            isPadded: false,
-            maxWidth: 24,
-            onRender: () => (
-            <Stack horizontal verticalAlign="center" className={classNames.iconContainer}>
-                <img src="/favicon.ico" className={classNames.headerIcon} alt="" />
-            </Stack>
-            ),
-        },
         {
             key: "name",
             name: "Name",
@@ -98,7 +121,7 @@ export class NodesComponent extends Component<NodesComponentProps, INodesState> 
             key: "createdTime",
             name: "Created Time",
             fieldName: "createdTime",
-            minWidth: 100,
+            minWidth: 80,
             maxWidth: 300,
             flexGrow: 10,
             isRowHeader: true,
@@ -112,18 +135,72 @@ export class NodesComponent extends Component<NodesComponentProps, INodesState> 
             isPadded: true,
         },
         {
-            key: "resourceUsage",
-            name: "Resource Usage",
-            fieldName: "version",
+            key: "resources",
+            name: "Resources",
+            fieldName: "resources",
             minWidth: 100,
             flexGrow: 2,
             isRowHeader: true,
             isResizable: true,
-            isSorted: true,
-            isSortedDescending: false,
-            sortAscendingAriaLabel: "Sorted A to Z",
-            sortDescendingAriaLabel: "Sorted Z to A",
             onColumnClick: this._onColumnClick,
+            onRender: (node: INode) => (
+                <Stack>
+                    <StackItem><Text variant="large">CPU</Text></StackItem>
+                    <Stack>
+                        <StackItem>Capacity: {node.resources.cpu.capacity}</StackItem>
+                        <StackItem>Allocated: {node.resources.cpu.allocatable}</StackItem>
+                    </Stack>
+                    <StackItem><Text variant="large">Memory</Text></StackItem>
+                    <Stack>
+                        <StackItem>Capacity: {node.resources.memory.capacity}</StackItem>
+                        <StackItem>Allocated: {node.resources.memory.allocatable}</StackItem>
+                    </Stack>
+                    <StackItem><Text variant="large">Storage Volume</Text></StackItem>
+                    <Stack>
+                        <StackItem>Capacity: {node.resources.storageVolume.capacity}</StackItem>
+                        <StackItem>Allocated: {node.resources.storageVolume.allocatable}</StackItem>
+                    </Stack>
+                    <StackItem><Text variant="large">Pods</Text></StackItem>
+                    <Stack>
+                        <StackItem>Capacity: {node.resources.pods.capacity}</StackItem>
+                        <StackItem>Allocated: {node.resources.pods.allocatable}</StackItem>
+                    </Stack>
+                </Stack>
+            ),
+            data: "string",
+            isPadded: true,
+        },
+        {
+            key: "conditions",
+            name: "Conditions",
+            fieldName: "conditions",
+            minWidth: 100,
+            flexGrow: 2,
+            isRowHeader: true,
+            isResizable: true,
+            onColumnClick: this._onColumnClick,
+            onRender: (node: INode) => (
+                <Stack>
+                    {renderConditions(node.conditions!)}
+                </Stack>
+            ),
+            data: "string",
+            isPadded: true,
+        },
+        {
+            key: "taints",
+            name: "Taints",
+            fieldName: "taints",
+            minWidth: 100,
+            flexGrow: 2,
+            isRowHeader: true,
+            isResizable: true,
+            onColumnClick: this._onColumnClick,
+            onRender: (node: INode) => (
+                <Stack>
+                    {renderTaints(node.taints!)}
+                </Stack>
+            ),
             data: "string",
             isPadded: true,
         },
