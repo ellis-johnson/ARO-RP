@@ -7,6 +7,12 @@ interface NodesComponentProps {
     clusterName: string
 }
 
+const fieldStyles = {
+    root: {
+      paddingBottom: 20,
+    },
+  }
+
 const classNames = mergeStyleSets({
     controlWrapper: {
         display: "flex",
@@ -61,7 +67,7 @@ const nodeListStyles: Partial<IDetailsListStyles> = {
 const renderConditions = (conditions: Condition[]) => {
     return conditions.map(condition => {
       return <StackItem> 
-                <Stack>
+                <Stack styles={fieldStyles}>
                     <StackItem><Text variant="large">{condition.type}</Text></StackItem>
                     <Stack>
                         <StackItem><Text variant="mediumPlus">Status</Text></StackItem>
@@ -87,7 +93,7 @@ const renderConditions = (conditions: Condition[]) => {
   const renderTaints = (taints: Taint[]) => {
     return taints.map(taint => {
       return <StackItem>
-                <Stack>
+                <Stack styles={fieldStyles}>
                     <StackItem><Text variant="large">{taint.key}</Text></StackItem>
                     <StackItem>{taint.effect}</StackItem>
                 </Stack>
@@ -146,22 +152,22 @@ export class NodesComponent extends Component<NodesComponentProps, INodesState> 
             onRender: (node: INode) => (
                 <Stack>
                     <StackItem><Text variant="large">CPU</Text></StackItem>
-                    <Stack>
+                    <Stack styles={fieldStyles}>
                         <StackItem>Capacity: {node.resources.cpu.capacity}</StackItem>
                         <StackItem>Allocated: {node.resources.cpu.allocatable}</StackItem>
                     </Stack>
                     <StackItem><Text variant="large">Memory</Text></StackItem>
-                    <Stack>
+                    <Stack styles={fieldStyles}>
                         <StackItem>Capacity: {node.resources.memory.capacity}</StackItem>
                         <StackItem>Allocated: {node.resources.memory.allocatable}</StackItem>
                     </Stack>
                     <StackItem><Text variant="large">Storage Volume</Text></StackItem>
-                    <Stack>
+                    <Stack styles={fieldStyles}>
                         <StackItem>Capacity: {node.resources.storageVolume.capacity}</StackItem>
                         <StackItem>Allocated: {node.resources.storageVolume.allocatable}</StackItem>
                     </Stack>
                     <StackItem><Text variant="large">Pods</Text></StackItem>
-                    <Stack>
+                    <Stack styles={fieldStyles}>
                         <StackItem>Capacity: {node.resources.pods.capacity}</StackItem>
                         <StackItem>Allocated: {node.resources.pods.allocatable}</StackItem>
                     </Stack>
