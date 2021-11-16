@@ -49,13 +49,13 @@ interface ICluster {
   name: string
   subscription: string
   resourceGroup: string
-  id: string
+  resourceId: string
   version: string
   createdDate: string
   provisionedBy: string
   lastModified: string
-  state: string
-  failed: string
+  provisioningState: string
+  failedProvisioningState: string
   consoleLink: string
 }
 
@@ -186,7 +186,7 @@ class ClusterListComponent extends Component<ClusterListComponentProps, ICluster
         onColumnClick: this._onColumnClick,
         data: "string",
         onRender: (item: ICluster) => (
-          <Link onClick={(_) => this._onClusterInfoLinkClick(item)} href={"#" + item.id + "/overview"}>
+          <Link onClick={(_) => this._onClusterInfoLinkClick(item)} href={"#" + item.subscription + "/" + item.resourceGroup + "/" + item.name + "/overview"}>
             {item.name}
           </Link>
         ),
@@ -226,7 +226,7 @@ class ClusterListComponent extends Component<ClusterListComponentProps, ICluster
         isPadded: true,
       },
       {
-        key: "latestModified",
+        key: "lastModified",
         name: "Last Modified",
         fieldName: "lastModified",
         minWidth: 100,
@@ -242,9 +242,9 @@ class ClusterListComponent extends Component<ClusterListComponentProps, ICluster
         isPadded: true,
       },
       {
-        key: "createdDate",
+        key: "createdAt",
         name: "Creation Date",
-        fieldName: "createdDate",
+        fieldName: "createdAt",
         minWidth: 100,
         flexGrow: 2,
         isRowHeader: true,
@@ -274,9 +274,9 @@ class ClusterListComponent extends Component<ClusterListComponentProps, ICluster
         isPadded: true,
       },
       {
-        key: "state",
-        name: "State",
-        fieldName: "state",
+        key: "provisioningState",
+        name: "Provisioning State",
+        fieldName: "provisioningState",
         minWidth: 100,
         flexGrow: 2,
         isRowHeader: true,
@@ -288,7 +288,7 @@ class ClusterListComponent extends Component<ClusterListComponentProps, ICluster
         onColumnClick: this._onColumnClick,
         onRender: (item: ICluster) => (
           <Text>
-            {item.state}{item.failed && " - " + item.failed}
+            {item.provisioningState}{item.failedProvisioningState && " - " + item.failedProvisioningState}
           </Text>
         ),
         data: "string",
@@ -309,7 +309,7 @@ class ClusterListComponent extends Component<ClusterListComponentProps, ICluster
               <IconButton
                 iconProps={{ iconName: "BIDashboard" }}
                 aria-label="Prometheus"
-                href={item.id + `/prometheus`}
+                href={item.resourceId + `/prometheus`}
               />
             </TooltipHost>
             {/* <TooltipHost content={`OpenShift Console`}>
@@ -326,7 +326,7 @@ class ClusterListComponent extends Component<ClusterListComponentProps, ICluster
                 onClick={(_) => this._onSSHClick(item)}
               />
             </TooltipHost>
-            <KubeconfigButton clusterID={item.id} csrfToken={props.csrfToken} />
+            <KubeconfigButton clusterID={item.resourceId} csrfToken={props.csrfToken} />
             {/* <TooltipHost content={`Geneva`}>
               <IconButton
                 iconProps={{ iconName: "Health" }}
@@ -412,7 +412,7 @@ class ClusterListComponent extends Component<ClusterListComponentProps, ICluster
   }
 
   private _onClusterInfoLinkClick(item: ICluster): void { // TODO: item ---- should not be any, create an interface or something.
-    const thisCluster: IClusterDetail = {clusterName: item.name, subscription: item.subscription, resource: item.resourceGroup, resourceId: item.id}
+    const thisCluster: IClusterDetail = {clusterName: item.name, subscription: item.subscription, resource: item.resourceGroup, resourceId: item.resourceId}
     this._setCurrentCluster(thisCluster)
   }
 

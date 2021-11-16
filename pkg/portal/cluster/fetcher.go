@@ -7,6 +7,7 @@ import (
 	"context"
 
 	configclient "github.com/openshift/client-go/config/clientset/versioned"
+	maoclient "github.com/openshift/machine-api-operator/pkg/generated/clientset/versioned"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 
@@ -20,6 +21,7 @@ import (
 type FetchClient interface {
 	Nodes(context.Context) (*NodeListInformation, error)
 	ClusterOperators(context.Context) (*ClusterOperatorsInformation, error)
+	Machines(context.Context) (*MachineListInformation, error)
 }
 
 // client is an implementation of FetchClient. It currently contains a "fetcher"
@@ -38,9 +40,10 @@ type client struct {
 // contains Kubernetes clients and returns the frontend-suitable data
 // structures. The concrete implementation of FetchClient wraps this.
 type realFetcher struct {
-	kubernetescli kubernetes.Interface
 	log           *logrus.Entry
 	configcli     configclient.Interface
+	kubernetescli kubernetes.Interface
+	maoclient     maoclient.Interface
 }
 
 func newRealFetcher(log *logrus.Entry, dialer proxy.Dialer, doc *api.OpenShiftClusterDocument) (*realFetcher, error) {
@@ -57,10 +60,13 @@ func newRealFetcher(log *logrus.Entry, dialer proxy.Dialer, doc *api.OpenShiftCl
 
 	kubernetescli, err := kubernetes.NewForConfig(restConfig)
 
+	maoclient, err := maoclient.NewForConfig(restConfig)
+
 	return &realFetcher{
 		log:           log,
 		configcli:     configcli,
 		kubernetescli: kubernetescli,
+		maoclient:     maoclient,
 	}, nil
 }
 

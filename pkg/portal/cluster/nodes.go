@@ -26,7 +26,7 @@ type Taint struct {
 	TimeAdded string `json:"timeAdded,omitempty"`
 }
 
-type MachineInformation struct {
+type MachineResources struct {
 	CPU           string
 	StorageVolume string
 	Memory        string
@@ -34,12 +34,12 @@ type MachineInformation struct {
 }
 
 type NodeInformation struct {
-	Name        string             `json:"name"`
-	CreatedTime string             `json:"createdTime"`
-	Capacity    MachineInformation `json:"capacity"`
-	Allocatable MachineInformation `json:"allocatable"`
-	Taints      []Taint            `json:"taints"`
-	Conditions  []NodeConditions   `json:"conditions"`
+	Name        string           `json:"name"`
+	CreatedTime string           `json:"createdTime"`
+	Capacity    MachineResources `json:"capacity"`
+	Allocatable MachineResources `json:"allocatable"`
+	Taints      []Taint          `json:"taints"`
+	Conditions  []NodeConditions `json:"conditions"`
 }
 
 type NodeListInformation struct {
@@ -82,13 +82,13 @@ func NodesFromNodeList(nodes *corev1.NodeList) *NodeListInformation {
 		final.Nodes = append(final.Nodes, NodeInformation{
 			Name:        node.Name,
 			CreatedTime: node.CreationTimestamp.String(),
-			Capacity: MachineInformation{
+			Capacity: MachineResources{
 				CPU:           node.Status.Capacity.Cpu().String(),
 				StorageVolume: node.Status.Capacity.StorageEphemeral().String(),
 				Memory:        node.Status.Capacity.Memory().String(),
 				Pods:          node.Status.Capacity.Pods().String(),
 			},
-			Allocatable: MachineInformation{
+			Allocatable: MachineResources{
 				CPU:           node.Status.Allocatable.Cpu().String(),
 				StorageVolume: node.Status.Allocatable.StorageEphemeral().String(),
 				Memory:        node.Status.Allocatable.Memory().String(),

@@ -56,13 +56,13 @@ func TestNodes(t *testing.T) {
 		Nodes: []NodeInformation{
 			{
 				Name: "aro-master-0",
-				Capacity: MachineInformation{
+				Capacity: MachineResources{
 					CPU:           "8",
 					StorageVolume: "1073189868Ki",
 					Memory:        "32933416Ki",
 					Pods:          "250",
 				},
-				Allocatable: MachineInformation{
+				Allocatable: MachineResources{
 					CPU:           "7500m",
 					StorageVolume: "987978038888",
 					Memory:        "31782440Ki",

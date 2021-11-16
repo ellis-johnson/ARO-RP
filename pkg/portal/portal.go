@@ -262,11 +262,11 @@ func (p *portal) aadAuthenticatedRoutes(r *mux.Router) {
 	r.NewRoute().Methods(http.MethodGet).Path("/api/clusters").HandlerFunc(p.clusters)
 	r.NewRoute().Methods(http.MethodGet).Path("/api/info").HandlerFunc(p.info)
 
-
 	// Cluster-specific routes
 	r.NewRoute().PathPrefix("/api/{subscription}/{resourceGroup}/{name}/clusteroperators").HandlerFunc(p.clusterOperators)
 	r.NewRoute().PathPrefix("/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/microsoft.redhatopenshift/openshiftclusters/{resourceName}/nodes").HandlerFunc(p.nodes)
-	r.NewRoute().Methods(http.MethodGet).Path("/api/{subscription}/{resourceGroup}/{name}").HandlerFunc(p.clusterInfo)
+	r.NewRoute().PathPrefix("/api/{subscription}/{resourceGroup}/{name}").HandlerFunc(p.clusterInfo)
+	r.NewRoute().PathPrefix("/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/microsoft.redhatopenshift/openshiftclusters/{resourceName}/machines").HandlerFunc(p.machines)
 }
 
 // makeFetcher creates a cluster.FetchClient suitable for use by the Portal REST API

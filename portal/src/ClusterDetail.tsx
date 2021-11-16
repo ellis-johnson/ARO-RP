@@ -124,13 +124,13 @@ export function ClusterDetailPanel(props: {
         {
           name: 'Overview',
           key: overviewKey,
-          url: '#' + props.currentCluster.resourceId + '/overview',
+          url: '#' + props.currentCluster.subscription + "/" + props.currentCluster.resource + "/" + props.currentCluster.clusterName + '/overview',
           icon: 'ThisPC',
         },
         {
           name: 'Nodes',
           key: nodesKey,
-          url: '#' + props.currentCluster.resourceId + '/nodes',
+          url: '#' + props.currentCluster.subscription + "/" + props.currentCluster.resource + "/" + props.currentCluster.clusterName + '/nodes',
           icon: 'BuildQueue',
         },
       ],
