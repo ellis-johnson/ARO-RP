@@ -38,9 +38,9 @@ type client struct {
 // contains Kubernetes clients and returns the frontend-suitable data
 // structures. The concrete implementation of FetchClient wraps this.
 type realFetcher struct {
+	kubernetescli kubernetes.Interface
 	log           *logrus.Entry
 	configcli     configclient.Interface
-	kubernetescli kubernetes.Interface
 }
 
 func newRealFetcher(log *logrus.Entry, dialer proxy.Dialer, doc *api.OpenShiftClusterDocument) (*realFetcher, error) {

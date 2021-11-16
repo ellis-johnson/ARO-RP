@@ -33,7 +33,7 @@ func NewTestPortal(_env env.Core, dbOpenShiftClusters database.OpenShiftClusters
 	auditHook, portalAuditLog := testlog.NewAudit()
 
 	l := listener.NewListener()
-	p := NewPortal(_env, portalAuditLog, portalLog, portalAccessLog, l, nil, nil, "", nil, nil, "", nil, nil, make([]byte, 32), nil, nil, elevatedGroupIDs, dbOpenShiftClusters, dbPortal, nil, nil).(*portal)
+	p := NewPortal(_env, portalAuditLog, portalLog, portalAccessLog, l, nil, nil, "", nil, nil, "", nil, nil, make([]byte, 32), nil, nonElevatedGroupIDs, elevatedGroupIDs, dbOpenShiftClusters, dbPortal, nil, nil).(*portal)
 
 	return &testPortal{
 		p:             p,
@@ -50,7 +50,6 @@ func (p *testPortal) DumpLogs(t *testing.T) {
 }
 
 func (p *testPortal) Run(ctx context.Context) error {
-
 	err := p.p.setupRouter()
 	if err != nil {
 		return err
@@ -91,6 +90,8 @@ func (p *testPortal) Request(method string, path string, authenticated bool, ele
 		var groups []string
 		if elevated {
 			groups = elevatedGroupIDs
+		} else {
+			groups = nonElevatedGroupIDs
 		}
 		err = addAuth(req, groups)
 		if err != nil {

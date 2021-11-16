@@ -13,7 +13,7 @@
             "args": [
                 "portal",
             ],
-            "buildFlags": "-tags containers_image_openpgp -ldflags '-X github.com/Azure/ARO-RP/pkg/util/version.GitCommit=debug'"
+            "buildFlags": "-tags aro,containers_image_openpgp -ldflags '-X github.com/Azure/ARO-RP/pkg/util/version.GitCommit=debug'"
         }
     ]
 }

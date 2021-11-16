@@ -285,7 +285,7 @@ gpgcheck=yes
 EOF
 
 for attempt in {1..5}; do
-yum --enablerepo=rhui-rhel-7-server-rhui-optional-rpms -y install azsec-clamav azsec-monitor azure-cli azure-mdsd azure-security docker openssl-perl td-agent-bit && break
+yum --enablerepo=rhui-rhel-7-server-rhui-optional-rpms -y install clamav azsec-clamav azsec-monitor azure-cli azure-mdsd azure-security docker openssl-perl td-agent-bit && break
   if [[ ${attempt} -lt 5 ]]; then sleep 10; else exit 1; fi
 done
 
@@ -319,9 +319,11 @@ EOF
 export AZURE_CLOUD_NAME=$AZURECLOUDNAME
 az login -i --allow-no-subscriptions
 
-# Running "az account set" is not working in the pipeline.
-# we are running VM ScaleSet in a named ResourceGroup, it should
-# be OK to to remove this set subscription
+# The managed identity that the VM runs as only has a single roleassignment.
+# This role assignment is ACRPull which is not necessarily present in the
+# subscription we're deploying into.  If the identity does not have any
+# role assignments scoped on the subscription we're deploying into, it will
+# not show on az login -i, which is why the below line is commented.
 # az account set -s "$SUBSCRIPTIONID"
 
 systemctl start docker.service
@@ -570,7 +572,7 @@ done
 	return &arm.Resource{
 		Resource: &mgmtcompute.VirtualMachineScaleSet{
 			Sku: &mgmtcompute.Sku{
-				Name:     to.StringPtr("[parameters('vmSize')]"),
+				Name:     to.StringPtr("[parameters('gatewayVmSize')]"),
 				Tier:     to.StringPtr("Standard"),
 				Capacity: to.Int64Ptr(1339),
 			},
@@ -616,9 +618,8 @@ done
 							{
 								Name: to.StringPtr("gateway-vmss-nic"),
 								VirtualMachineScaleSetNetworkConfigurationProperties: &mgmtcompute.VirtualMachineScaleSetNetworkConfigurationProperties{
-									Primary: to.BoolPtr(true),
-									// TODO: enable this (requires >= Standard_D4s_v3)
-									// EnableAcceleratedNetworking: to.BoolPtr(true),
+									Primary:                     to.BoolPtr(true),
+									EnableAcceleratedNetworking: to.BoolPtr(true),
 									IPConfigurations: &[]mgmtcompute.VirtualMachineScaleSetIPConfiguration{
 										{
 											Name: to.StringPtr("gateway-vmss-ipconfig"),
