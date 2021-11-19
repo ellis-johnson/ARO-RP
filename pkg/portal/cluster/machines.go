@@ -11,11 +11,14 @@ import (
 )
 
 type MachinesInformation struct {
-	Name         string `json:"name"`
-	CreatedTime  string `json:"createdtime"`
-	LastUpdated  string `json:"lastupdated"`
-	ErrorReason  string `json:"errorreason"`
-	ErrorMessage string `json:"errormessage"`
+	Name              string `json:"name"`
+	CreatedTime       string `json:"createdtime"`
+	LastUpdated       string `json:"lastupdated"`
+	ErrorReason       string `json:"errorreason"`
+	ErrorMessage      string `json:"errormessage"`
+	LastOperation     string `json:"lastoperation"`
+	LastOperationDate string `json:"lastoperationdate"`
+	Status            string `json:"status"`
 }
 
 type MachineListInformation struct {
@@ -28,12 +31,42 @@ func MachinesFromMachineList(machines *machineapi.MachineList) *MachineListInfor
 	}
 
 	for _, machine := range machines.Items {
-		// TODO: Add Null fields seperately!
+		lastOperation := "Unknown"
+		if machine.Status.LastOperation != nil &&
+			machine.Status.LastOperation.Description != nil {
+			lastOperation = *machine.Status.LastOperation.Description
+		}
+
+		lastOperationDate := "Unknown"
+		if machine.Status.LastOperation != nil &&
+			machine.Status.LastOperation.LastUpdated != nil {
+			lastOperationDate = machine.Status.LastOperation.LastUpdated.String()
+		}
+
+		status := "Unknown"
+		if machine.Status.Phase != nil {
+			status = *machine.Status.Phase
+		}
+
+		errorReason := "None"
+		if machine.Status.ErrorReason != nil {
+			errorReason = string(*machine.Status.ErrorReason)
+		}
+
+		errorMessage := "None"
+		if machine.Status.ErrorMessage != nil {
+			errorMessage = *machine.Status.ErrorMessage
+		}
 
 		final.Machines = append(final.Machines, MachinesInformation{
-			Name:        machine.Name,
-			CreatedTime: machine.CreationTimestamp.String(),
-			LastUpdated: machine.Status.LastUpdated.String(),
+			Name:              machine.Name,
+			CreatedTime:       machine.CreationTimestamp.String(),
+			LastUpdated:       machine.Status.LastUpdated.String(),
+			ErrorReason:       errorReason,
+			ErrorMessage:      errorMessage,
+			LastOperation:     lastOperation,
+			LastOperationDate: lastOperationDate,
+			Status:            status,
 		})
 	}
 

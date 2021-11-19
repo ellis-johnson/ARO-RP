@@ -22,6 +22,7 @@ type FetchClient interface {
 	Nodes(context.Context) (*NodeListInformation, error)
 	ClusterOperators(context.Context) (*ClusterOperatorsInformation, error)
 	Machines(context.Context) (*MachineListInformation, error)
+	MachineSets(context.Context) (*MachineSetListInformation, error)
 }
 
 // client is an implementation of FetchClient. It currently contains a "fetcher"

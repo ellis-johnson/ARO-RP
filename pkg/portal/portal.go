@@ -264,14 +264,18 @@ func (p *portal) aadAuthenticatedRoutes(r *mux.Router) {
 
 	// Cluster-specific routes
 	r.NewRoute().PathPrefix("/api/{subscription}/{resourceGroup}/{name}/clusteroperators").HandlerFunc(p.clusterOperators)
-	r.NewRoute().PathPrefix("/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/microsoft.redhatopenshift/openshiftclusters/{resourceName}/nodes").HandlerFunc(p.nodes)
+	r.NewRoute().PathPrefix("/api/{subscription}/{resourceGroup}/{name}/nodes").HandlerFunc(p.nodes)
 	r.NewRoute().PathPrefix("/api/{subscription}/{resourceGroup}/{name}").HandlerFunc(p.clusterInfo)
-	r.NewRoute().PathPrefix("/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/microsoft.redhatopenshift/openshiftclusters/{resourceName}/machines").HandlerFunc(p.machines)
+	r.NewRoute().PathPrefix("/api/{subscription}/{resourceGroup}/{name}/machines").HandlerFunc(p.machines)
+	r.NewRoute().PathPrefix("/api/{subscription}/{resourceGroup}/{name}/machines").HandlerFunc(p.machineSets)
 }
 
 // makeFetcher creates a cluster.FetchClient suitable for use by the Portal REST API
 func (p *portal) makeFetcher(ctx context.Context, r *http.Request) (cluster.FetchClient, error) {
-	resourceID := strings.Join(strings.Split(r.URL.Path, "/")[:9], "/")
+
+	urlVars := strings.Split(r.URL.Path, "/")
+	resourceID := "/subscriptions/" + urlVars[2] + "/resourcegroups/" + urlVars[3] + "/providers/microsoft.redhatopenshift/openshiftclusters/" + urlVars[4]
+
 	if !validate.RxClusterID.MatchString(resourceID) {
 		return nil, fmt.Errorf("invalid resource ID")
 	}

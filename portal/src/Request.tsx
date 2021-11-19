@@ -41,7 +41,7 @@ export const FetchInfo = async (): Promise<AxiosResponse | null> => {
 
 export const FetchNodes = async (subscription: string, resourceGroup: string, name: string): Promise<AxiosResponse | null> => {
   try {
-    const result = await axios("/subscriptions/" + subscription + "/resourcegroups/" + resourceGroup + "/providers/microsoft.redhatopenshift/openshiftclusters/" + name + "/nodes")
+    const result = await axios("/api/" + subscription + "/" + resourceGroup + "/" + name + "/nodes")
     return result
   } catch (e) {
     let err = e.response as AxiosResponse
