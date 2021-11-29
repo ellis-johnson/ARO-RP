@@ -33,10 +33,16 @@ type MachineResources struct {
 	Pods          string
 }
 
+type Volume struct {
+	Name string
+	Path string
+}
+
 type NodeInformation struct {
 	Name        string           `json:"name"`
 	CreatedTime string           `json:"createdTime"`
 	Capacity    MachineResources `json:"capacity"`
+	Volumes     []Volume         `json:"volumes"`
 	Allocatable MachineResources `json:"allocatable"`
 	Taints      []Taint          `json:"taints"`
 	Conditions  []NodeConditions `json:"conditions"`
@@ -79,6 +85,14 @@ func NodesFromNodeList(nodes *corev1.NodeList) *NodeListInformation {
 			})
 		}
 
+		volumes := []Volume{}
+		for _, volume := range node.Status.VolumesAttached {
+			volumes = append(volumes, Volume{
+				Name: string(volume.Name),
+				Path: volume.DevicePath,
+			})
+		}
+
 		final.Nodes = append(final.Nodes, NodeInformation{
 			Name:        node.Name,
 			CreatedTime: node.CreationTimestamp.String(),
@@ -96,6 +110,7 @@ func NodesFromNodeList(nodes *corev1.NodeList) *NodeListInformation {
 			},
 			Taints:     taints,
 			Conditions: conditions,
+			Volumes:    volumes,
 		})
 	}
 
