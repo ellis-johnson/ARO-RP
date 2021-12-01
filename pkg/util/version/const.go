@@ -18,9 +18,11 @@ const (
 	DevClusterGenevaMetricsAccount       = "AzureRedHatOpenShiftCluster"
 	DevGenevaLoggingEnvironment          = "Test"
 	DevRPGenevaLoggingAccount            = "ARORPLogs"
-	DevRPGenevaLoggingConfigVersion      = "3.7"
+	DevRPGenevaLoggingConfigVersion      = "4.3"
 	DevRPGenevaLoggingNamespace          = "ARORPLogs"
 	DevRPGenevaMetricsAccount            = "AzureRedHatOpenShiftRP"
+
+	DevGatewayGenevaLoggingConfigVersion = "4.3"
 )
 
 var GitCommit = "unknown"
@@ -56,7 +58,7 @@ var (
 
 // FluentbitImage contains the location of the Fluentbit container image
 func FluentbitImage(acrDomain string) string {
-	return acrDomain + "/fluentbit:1.7.8-1"
+	return acrDomain + "/fluentbit:1.8.9-1"
 }
 
 // MdmImage contains the location of the MDM container image
@@ -66,7 +68,7 @@ func MdmImage(acrDomain string) string {
 		return os.Getenv("GENEVA_MDM_IMAGE_OVERRIDE")
 	}
 
-	return acrDomain + "/genevamdm:master_20210905.1"
+	return acrDomain + "/genevamdm:master_20210928.1"
 }
 
 // MdsdImage contains the location of the MDSD container image
@@ -76,5 +78,5 @@ func MdsdImage(acrDomain string) string {
 		return os.Getenv("GENEVA_MDSD_IMAGE_OVERRIDE")
 	}
 
-	return acrDomain + "/genevamdsd:master_20210905.1"
+	return acrDomain + "/genevamdsd:master_20211001.1"
 }
