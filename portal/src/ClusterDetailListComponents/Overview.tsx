@@ -13,40 +13,40 @@ interface IOverviewComponentState {
     item: IClusterDetails
 }
 
-const ShimmerStyle: Partial<IShimmerStyles> = {
+export const ShimmerStyle: Partial<IShimmerStyles> = {
     root: {
         margin: "11px 0"
     }
 }
 
-const headShimmerStyle: Partial<IShimmerStyles> = {
+export const headShimmerStyle: Partial<IShimmerStyles> = {
     root: {
         margin: "15px 0"
     }
 }
 
-const headerShimmer = [
+export const headerShimmer = [
     { type: ShimmerElementType.line, height: 32, width: '25%' },
 ]
 
-const rowShimmer = [
+export const rowShimmer = [
     { type: ShimmerElementType.line, height: 18, width: '75%' },
 ]
 
-const KeyColumnStyle: Partial<IStackStyles> = {
+export const KeyColumnStyle: Partial<IStackStyles> = {
     root: {
         paddingTop: 10,
         paddingRight: 15,
     }
 }
 
-const ValueColumnStyle: Partial<IStackStyles> = {
+export const ValueColumnStyle: Partial<IStackStyles> = {
     root: {
         paddingTop: 10,
     }
 }
 
-const KeyStyle: IStackItemStyles = {
+export const KeyStyle: IStackItemStyles = {
     root: {
         fontStyle: "bold",
         alignSelf: "flex-start",
@@ -56,7 +56,7 @@ const KeyStyle: IStackItemStyles = {
     }
 }
 
-const ValueStyle: IStackItemStyles = {
+export const ValueStyle: IStackItemStyles = {
     root: {
         paddingBottom: 10
     }
@@ -111,31 +111,31 @@ export class OverviewComponent extends Component<OverviewComponentProps, IOvervi
             })
             return (
                 <Stack styles={contentStackStylesNormal}>
-                <Text variant="xxLarge">{this.props.clusterName}</Text>
-                <Stack horizontal>
-                <Stack styles={KeyColumnStyle}>
-                {filteredHeaders.map((value: [string, any], index: number) => (
-                    <ClusterDetailCell style={KeyStyle} key={index} value={value[1]} />
-                    )
-                )}
-                </Stack>
-                
-                <Stack styles={KeyColumnStyle}>
-                {Array(filteredHeaders.length).fill(':').map((value: [string], index: number) => (
-                    <ClusterDetailCell style={KeyStyle} key={index} value={value} />
-                    )
-                )}
-                </Stack>
-                
-                <Stack styles={ValueColumnStyle}>
-                {filteredHeaders.map((value: [string, any], index: number) => (
-                    <ClusterDetailCell style={ValueStyle}
-                    key={index}
-                    value={this.props.item[value[0]]} />
-                    )
-                )}
-                </Stack>
-                </Stack>
+                    <Text variant="xxLarge">{this.props.clusterName}</Text>
+                    <Stack horizontal>
+                        <Stack styles={KeyColumnStyle}>
+                        {filteredHeaders.map((value: [string, any], index: number) => (
+                            <ClusterDetailCell style={KeyStyle} key={index} value={value[1]} />
+                            )
+                        )}
+                        </Stack>
+                        
+                        <Stack styles={KeyColumnStyle}>
+                        {Array(filteredHeaders.length).fill(':').map((value: [string], index: number) => (
+                            <ClusterDetailCell style={KeyStyle} key={index} value={value} />
+                            )
+                        )}
+                        </Stack>
+                        
+                        <Stack styles={ValueColumnStyle}>
+                        {filteredHeaders.map((value: [string, any], index: number) => (
+                            <ClusterDetailCell style={ValueStyle}
+                            key={index}
+                            value={this.props.item[value[0]]} />
+                            )
+                        )}
+                        </Stack>
+                    </Stack>
                 </Stack>
             );
         } else {

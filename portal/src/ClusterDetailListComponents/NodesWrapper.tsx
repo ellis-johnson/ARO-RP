@@ -6,38 +6,42 @@ import { NodesComponent } from './Nodes';
 import { IMessageBarStyles, MessageBar, MessageBarType, Stack } from '@fluentui/react';
 import { nodesKey } from "../ClusterDetail";
 
-export interface Condition {
-  type: string,
+export interface ICondition {
   status: string,
   lastHeartbeatTime: string,
   lastTransitionTime: string,
   message: string
 }
 
-export interface Resource {
-  capacity: string,
-  allocatable: string
-}
-
-export interface ResourceUsage {
-  cpu: Resource,
-  memory: Resource,
-  storageVolume: Resource
-  pods: Resource
-}
-
-export interface Taint {
+export interface ITaint {
   key: string,
-  effect: string
 }
 
+export interface IVolume {
+  Path: string,
+}
+
+export interface IResourceUsage {
+  CPU: string
+  Memory: string
+  StorageVolume: string
+  Pods: string
+}
 
 export interface INode {
   name: string,
   createdTime: string,
-  resources: ResourceUsage,
-  conditions?: Condition[],
-  taints?: Taint[]
+  capacity: IResourceUsage,
+  allocatable: IResourceUsage
+  conditions?: ICondition[],
+  taints?: ITaint[]
+  labels?: Map<string, string>
+  annotations?: Map<string, string>
+  volumes?: IVolume[]
+}
+
+export interface INodeOverviewDetails {
+  createdTime: string
 }
 
 export function NodesWrapper(props: {
@@ -73,36 +77,40 @@ export function NodesWrapper(props: {
     setData(newData)
     let nodeList: INode[] = []
     if (state && state.current) {
-      newData.nodes.forEach((element: { name: any; createdTime: any; capacity: any; allocatable: any; taints: Taint[], conditions: Condition[]}) => {
+      newData.nodes.forEach((element: { name: any;
+                                        createdTime: any;
+                                        capacity: any;
+                                        allocatable: any;
+                                        taints: ITaint[],
+                                        conditions: ICondition[],
+                                        labels: object,
+                                        annotations: object,
+                                        volumes: IVolume[]}) => {
         let node: INode = {
           name: element.name,
           createdTime: element.createdTime,
-          resources: {
-            cpu: {
-              capacity: element.capacity.CPU,
-              allocatable: element.allocatable.CPU
-            },
-            storageVolume: {
-              capacity: element.capacity.StorageVolume,
-              allocatable: element.allocatable.StorageVolume
-            },
-            memory: {
-              capacity: element.capacity.Memory,
-              allocatable: element.allocatable.Memory
-            },
-            pods: {
-              capacity: element.capacity.Pods,
-              allocatable: element.allocatable.Pods
-            }
-          }
+          capacity: element.capacity,
+          allocatable: element.allocatable,
         }
         node.taints = []
-        element.taints.forEach((taint: Taint) => {
+        element.taints.forEach((taint: ITaint) => {
           node.taints!.push(taint)
         });
         node.conditions = []
-        element.conditions.forEach((condition: Condition) => {
+        element.conditions.forEach((condition: ICondition) => {
           node.conditions!.push(condition)
+        });
+        node.labels = new Map([])
+        Object.entries(element.labels).forEach((label: [string, string]) => {
+            node.labels?.set(label[0], label[1])
+          });
+        node.volumes = []
+        element.volumes.forEach((volume: IVolume) => {
+          node.volumes!.push(volume)
+        });
+        node.annotations = new Map([])
+        Object.entries(element.annotations).forEach((annotation: [string, string]) => {
+          node.annotations?.set(annotation[0], annotation[1])
         });
         nodeList.push(node)
       });

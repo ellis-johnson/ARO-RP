@@ -39,13 +39,15 @@ type Volume struct {
 }
 
 type NodeInformation struct {
-	Name        string           `json:"name"`
-	CreatedTime string           `json:"createdTime"`
-	Capacity    MachineResources `json:"capacity"`
-	Volumes     []Volume         `json:"volumes"`
-	Allocatable MachineResources `json:"allocatable"`
-	Taints      []Taint          `json:"taints"`
-	Conditions  []NodeConditions `json:"conditions"`
+	Name        string            `json:"name"`
+	CreatedTime string            `json:"createdTime"`
+	Capacity    MachineResources  `json:"capacity"`
+	Volumes     []Volume          `json:"volumes"`
+	Allocatable MachineResources  `json:"allocatable"`
+	Taints      []Taint           `json:"taints"`
+	Conditions  []NodeConditions  `json:"conditions"`
+	Labels      map[string]string `json:"labels"`
+	Annotations map[string]string `json:"annotations"`
 }
 
 type NodeListInformation struct {
@@ -108,9 +110,11 @@ func NodesFromNodeList(nodes *corev1.NodeList) *NodeListInformation {
 				Memory:        node.Status.Allocatable.Memory().String(),
 				Pods:          node.Status.Allocatable.Pods().String(),
 			},
-			Taints:     taints,
-			Conditions: conditions,
-			Volumes:    volumes,
+			Taints:      taints,
+			Conditions:  conditions,
+			Volumes:     volumes,
+			Labels:      node.Labels,
+			Annotations: node.Annotations,
 		})
 	}
 
