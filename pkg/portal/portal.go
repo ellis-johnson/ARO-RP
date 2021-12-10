@@ -252,7 +252,7 @@ func (p *portal) unauthenticatedRoutes(r *mux.Router) {
 func (p *portal) aadAuthenticatedRoutes(r *mux.Router) {
 	for _, name := range AssetNames() {
 		if name == "index.html" {
-			r.NewRoute().Methods(http.MethodGet).Path("/").HandlerFunc(p.serve(name))
+			r.NewRoute().Methods(http.MethodGet).Path("/").HandlerFunc(p.index)
 			continue
 		}
 
@@ -268,6 +268,21 @@ func (p *portal) aadAuthenticatedRoutes(r *mux.Router) {
 	r.NewRoute().PathPrefix("/api/{subscription}/{resourceGroup}/{name}").HandlerFunc(p.clusterInfo)
 	r.NewRoute().PathPrefix("/api/{subscription}/{resourceGroup}/{name}/machines").HandlerFunc(p.machines)
 	r.NewRoute().PathPrefix("/api/{subscription}/{resourceGroup}/{name}/machines").HandlerFunc(p.machineSets)
+}
+
+func (p *portal) index(w http.ResponseWriter, r *http.Request) {
+	buf := &bytes.Buffer{}
+
+	err := p.t.ExecuteTemplate(buf, "index.html", map[string]interface{}{
+		"location":       p.env.Location(),
+		csrf.TemplateTag: csrf.TemplateField(r),
+	})
+	if err != nil {
+		p.internalServerError(w, err)
+		return
+	}
+
+	http.ServeContent(w, r, "index.html", time.Time{}, bytes.NewReader(buf.Bytes()))
 }
 
 // makeFetcher creates a cluster.FetchClient suitable for use by the Portal REST API
