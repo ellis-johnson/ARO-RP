@@ -49,6 +49,26 @@ export const FetchNodes = async (subscription: string, resourceGroup: string, na
   }
 }
 
+export const FetchMachines = async (subscription: string, resourceGroup: string, name: string): Promise<AxiosResponse | null> => {
+  try {
+    const result = await axios("/api/" + subscription + "/" + resourceGroup + "/" + name + "/machines")
+    return result
+  } catch (e) {
+    let err = e.response as AxiosResponse
+    return OnError(err)
+  }
+}
+
+export const FetchMachineSets = async (subscription: string, resourceGroup: string, name: string): Promise<AxiosResponse | null> => {
+  try {
+    const result = await axios("/api/" + subscription + "/" + resourceGroup + "/" + name + "/machinesets")
+    return result
+  } catch (e) {
+    let err = e.response as AxiosResponse
+    return OnError(err)
+  }
+}
+
 export const ProcessLogOut = async (): Promise<any> => {
   try {
     const result = await axios({method: "POST", url: "/api/logout"})

@@ -12,12 +12,12 @@ import (
 
 type MachinesInformation struct {
 	Name              string `json:"name"`
-	CreatedTime       string `json:"createdtime"`
-	LastUpdated       string `json:"lastupdated"`
-	ErrorReason       string `json:"errorreason"`
-	ErrorMessage      string `json:"errormessage"`
-	LastOperation     string `json:"lastoperation"`
-	LastOperationDate string `json:"lastoperationdate"`
+	CreatedTime       string `json:"createdTime"`
+	LastUpdated       string `json:"lastUpdated"`
+	ErrorReason       string `json:"errorReason"`
+	ErrorMessage      string `json:"errorMessage"`
+	LastOperation     string `json:"lastOperation"`
+	LastOperationDate string `json:"lastOperationDate"`
 	Status            string `json:"status"`
 }
 

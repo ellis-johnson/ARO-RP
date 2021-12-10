@@ -25,6 +25,8 @@ const navStyles: Partial<INavStyles> = {
 
 export const overviewKey = "overview"
 export const nodesKey = "nodes"
+export const machinesKey = "machines"
+export const machineSetsKey = "machineSets"
 
 const customPanelStyle: Partial<IPanelStyles> = {
   root: { top: "40px", left: "225px" },
@@ -131,6 +133,18 @@ export function ClusterDetailPanel(props: {
           name: 'Nodes',
           key: nodesKey,
           url: '#' + props.currentCluster.subscription + "/" + props.currentCluster.resource + "/" + props.currentCluster.clusterName + '/nodes',
+          icon: 'BuildQueue',
+        },
+        {
+          name: 'Machines',
+          key: machinesKey,
+          url: '#' + props.currentCluster.subscription + "/" + props.currentCluster.resource + "/" + props.currentCluster.clusterName + '/machines',
+          icon: 'BuildQueue',
+        },
+        {
+          name: 'MachineSets',
+          key: machineSetsKey,
+          url: '#' + props.currentCluster.subscription + "/" + props.currentCluster.resource + "/" + props.currentCluster.clusterName + '/machineSets',
           icon: 'BuildQueue',
         },
       ],

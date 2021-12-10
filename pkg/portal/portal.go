@@ -265,9 +265,9 @@ func (p *portal) aadAuthenticatedRoutes(r *mux.Router) {
 	// Cluster-specific routes
 	r.NewRoute().PathPrefix("/api/{subscription}/{resourceGroup}/{name}/clusteroperators").HandlerFunc(p.clusterOperators)
 	r.NewRoute().PathPrefix("/api/{subscription}/{resourceGroup}/{name}/nodes").HandlerFunc(p.nodes)
-	r.NewRoute().PathPrefix("/api/{subscription}/{resourceGroup}/{name}").HandlerFunc(p.clusterInfo)
 	r.NewRoute().PathPrefix("/api/{subscription}/{resourceGroup}/{name}/machines").HandlerFunc(p.machines)
-	r.NewRoute().PathPrefix("/api/{subscription}/{resourceGroup}/{name}/machines").HandlerFunc(p.machineSets)
+	r.NewRoute().PathPrefix("/api/{subscription}/{resourceGroup}/{name}/machineSets").HandlerFunc(p.machineSets)
+	r.NewRoute().PathPrefix("/api/{subscription}/{resourceGroup}/{name}").HandlerFunc(p.clusterInfo)
 }
 
 func (p *portal) index(w http.ResponseWriter, r *http.Request) {

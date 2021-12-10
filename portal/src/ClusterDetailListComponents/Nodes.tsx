@@ -1,9 +1,8 @@
 import { Component } from "react"
-import { Stack, Text, mergeStyleSets, IColumn, IDetailsListStyles, TextField, DetailsList, SelectionMode, DetailsListLayoutMode, StackItem, Toggle, Fabric, Pivot, PivotItem, Label, Shimmer, IStackItemStyles, DefaultPalette, } from '@fluentui/react';
+import { Stack, Text, IDetailsListStyles, StackItem, Pivot, PivotItem, IStackItemStyles, } from '@fluentui/react';
 import { ICondition, INode, INodeOverviewDetails, IResourceUsage, ITaint, IVolume} from "./NodesWrapper";
-import { useBoolean } from '@fluentui/react-hooks';
 import { contentStackStylesNormal } from "../App";
-import { KeyStyle, ValueStyle, ValueColumnStyle, KeyColumnStyle, headShimmerStyle, headerShimmer, rowShimmer, ShimmerStyle } from '../ClusterDetailListComponents/Overview';
+import { InfoList, MultiInfoList } from "./InfoList"
 
 interface NodesComponentProps {
     nodes: any
@@ -44,72 +43,6 @@ const VolumeDetails: IVolume = {
 
 interface INodesState {
 nodes: INode[]
-}
-
-function Column(
-    value: any,
-    ): any {
-        if (typeof (value.value) == typeof (" ")) {
-            return <Stack.Item styles={value.style}>
-                      <Text styles={value.style} variant={'medium'}>{value.value}</Text>
-                   </Stack.Item>
-        }
-    };
-
-const InfoList = (
-    props: {headers: any, object: any, title: string, titleSize: any}
-) => {
-    var headerEntries = Object.entries(props.headers)
-    var filteredHeaders: Array<[string, any]> = []
-    headerEntries.filter((element: [string, any]) => {
-        if (props.object[element[0]] != null &&
-            props.object[element[0]].toString().length > 0) {
-                filteredHeaders.push(element)
-            }
-    })
-    return (
-        <Stack styles={contentStackStylesNormal}>
-            <Text variant={props.titleSize}>{props.title}</Text>
-            <Stack horizontal>
-                <Stack styles={KeyColumnStyle}>
-                {filteredHeaders.map((value: [string, any], index: number) => (
-                    <Column style={KeyStyle} key={index} value={value[1]} />
-                    )
-                )}
-                </Stack>
-                
-                <Stack styles={KeyColumnStyle}>
-                {Array(filteredHeaders.length).fill(':').map((value: [string], index: number) => (
-                    <Column style={KeyStyle} key={index} value={value} />
-                    )
-                )}
-                </Stack>
-                
-                <Stack styles={ValueColumnStyle}>
-                {filteredHeaders.map((value: [string, any], index: number) => (
-                    <Column style={ValueStyle}
-                    key={index}
-                    value={props.object[value[0]]} />
-                    )
-                )}
-                </Stack>
-            </Stack>
-        </Stack>
-    );
-}
-
-const MultiInfoList = (
-    props: any
-) => {
-    return props.items.map((item: { [x: string]: any; }) => {
-        return <InfoList headers={props.headers} object={item} title={item[props.subProp]} titleSize={item[props.titleSize]}/>
-    })
-}
-
-const nodeListStyles: Partial<IDetailsListStyles> = {
-    headerWrapper: {
-        marginTop: "-16px",
-    },
 }
 
 const HeadersFromStringMap = (items: Map<string,string>) => {
@@ -192,14 +125,6 @@ export class NodesComponent extends Component<NodesComponentProps, INodesState> 
     }
 
     public render() {
-        var { nodes } = this.state
-        var myStyle = nodeListStyles
-
-        // if ( !this.props.showColumns ) {
-        // columns = [columns[0], columns[1]]
-        // myStyle = clusterListDetailStylesSmall
-        // }
-
         return (
         <Stack styles={contentStackStylesNormal}>
             <Text variant="xxLarge">{this.props.clusterName}</Text>
@@ -208,20 +133,5 @@ export class NodesComponent extends Component<NodesComponentProps, INodesState> 
             </Stack>
         </Stack>
         )
-    }
-
-    private _getKey(item: any, _index?: number): string {
-        return item.key
-    }
-
-    private _onChangeText = (
-        _ev: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>,
-        text?: string
-    ): void => {
-        this.setState({
-        nodes: text
-            ? this.props.nodes.filter((i: { name: string; }) => i.name.toLowerCase().indexOf(text) > -1)
-            : this.props.nodes,
-        })
     }
 }

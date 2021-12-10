@@ -1,6 +1,7 @@
 import { Component } from "react"
 import { OverviewWrapper } from './ClusterDetailListComponents/OverviewWrapper';
 import { NodesWrapper } from './ClusterDetailListComponents/NodesWrapper';
+import { MachinesWrapper } from "./ClusterDetailListComponents/MachinesWrapper";
 import { IClusterDetail } from "./App";
 
 interface ClusterDetailComponentProps {
@@ -55,6 +56,13 @@ export class ClusterDetailComponent extends Component<ClusterDetailComponentProp
           return (
             <NodesWrapper currentCluster={this.props.clusterInfo} detailPanelSelected={this.props.detailPanelSelected} loaded={this.props.loaded}/>
           );
-        }    }
+        }
+        case "machines":
+        {
+          return (
+            <MachinesWrapper currentCluster={this.props.clusterInfo} detailPanelSelected={this.props.detailPanelSelected} loaded={this.props.loaded}/>
+          );
+        }
+      }
   }
 };
