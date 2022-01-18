@@ -285,6 +285,21 @@ func (p *portal) index(w http.ResponseWriter, r *http.Request) {
 	http.ServeContent(w, r, "index.html", time.Time{}, bytes.NewReader(buf.Bytes()))
 }
 
+func (p *portal) index(w http.ResponseWriter, r *http.Request) {
+	buf := &bytes.Buffer{}
+
+	err := p.t.ExecuteTemplate(buf, "index.html", map[string]interface{}{
+		"location":       p.env.Location(),
+		csrf.TemplateTag: csrf.TemplateField(r),
+	})
+	if err != nil {
+		p.internalServerError(w, err)
+		return
+	}
+
+	http.ServeContent(w, r, "index.html", time.Time{}, bytes.NewReader(buf.Bytes()))
+}
+
 // makeFetcher creates a cluster.FetchClient suitable for use by the Portal REST API
 func (p *portal) makeFetcher(ctx context.Context, r *http.Request) (cluster.FetchClient, error) {
 
