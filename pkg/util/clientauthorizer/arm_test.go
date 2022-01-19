@@ -10,12 +10,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/golang/mock/gomock"
 
 	"github.com/Azure/ARO-RP/pkg/util/azureclient"
@@ -24,14 +22,12 @@ import (
 
 func TestARMRefreshOnce(t *testing.T) {
 	for _, tt := range []struct {
-		name     string
-		azureEnv azureclient.AROEnvironment
-		do       func(*http.Request) (*http.Response, error)
-		wantErr  string
+		name    string
+		do      func(*http.Request) (*http.Response, error)
+		wantErr string
 	}{
 		{
-			name:     "valid public cloud",
-			azureEnv: azureclient.PublicCloud,
+			name: "valid",
 			do: func(*http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
@@ -52,30 +48,7 @@ func TestARMRefreshOnce(t *testing.T) {
 			},
 		},
 		{
-			name:     "valid gov cloud",
-			azureEnv: azureclient.USGovernmentCloud,
-			do: func(*http.Request) (*http.Response, error) {
-				return &http.Response{
-					StatusCode: http.StatusOK,
-					Header: http.Header{
-						"Content-Type": []string{"application/json; charset=utf-8"},
-					},
-					Body: ioutil.NopCloser(strings.NewReader(
-						`{
-							"clientCertificates": [
-								{
-									"notBefore": "2020-01-19T23:00:00Z",
-									"notAfter": "2020-01-20T01:00:00Z"
-								}
-							]
-						}`,
-					)),
-				}, nil
-			},
-		},
-		{
-			name:     "invalid - no certificate for now",
-			azureEnv: azureclient.PublicCloud,
+			name: "invalid - no certificate for now",
 			do: func(*http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
@@ -97,8 +70,7 @@ func TestARMRefreshOnce(t *testing.T) {
 			wantErr: "did not receive current certificate",
 		},
 		{
-			name:     "invalid JSON",
-			azureEnv: azureclient.PublicCloud,
+			name: "invalid JSON",
 			do: func(*http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
@@ -111,16 +83,14 @@ func TestARMRefreshOnce(t *testing.T) {
 			wantErr: "invalid character 'o' in literal null (expecting 'u')",
 		},
 		{
-			name:     "invalid - error",
-			azureEnv: azureclient.PublicCloud,
+			name: "invalid - error",
 			do: func(*http.Request) (*http.Response, error) {
 				return nil, errors.New("fake error")
 			},
 			wantErr: "fake error",
 		},
 		{
-			name:     "invalid - status code",
-			azureEnv: azureclient.PublicCloud,
+			name: "invalid - status code",
 			do: func(*http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusBadGateway,
@@ -130,8 +100,7 @@ func TestARMRefreshOnce(t *testing.T) {
 			wantErr: "unexpected status code 502",
 		},
 		{
-			name:     "invalid - content type",
-			azureEnv: azureclient.PublicCloud,
+			name: "invalid - content type",
 			do: func(*http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusOK,
@@ -149,7 +118,7 @@ func TestARMRefreshOnce(t *testing.T) {
 			defer controller.Finish()
 
 			im := mock_instancemetadata.NewMockInstanceMetadata(controller)
-			im.EXPECT().Environment().AnyTimes().Return(&tt.azureEnv)
+			im.EXPECT().Environment().AnyTimes().Return(&azureclient.PublicCloud)
 
 			a := &arm{
 				now: func() time.Time { return time.Date(2020, 1, 20, 0, 0, 0, 0, time.UTC) },
@@ -157,11 +126,7 @@ func TestARMRefreshOnce(t *testing.T) {
 					if req.Method != http.MethodGet {
 						return nil, fmt.Errorf("unexpected method %q", req.Method)
 					}
-					endpoint := strings.TrimSuffix(im.Environment().ResourceManagerEndpoint, "/") + ":24582"
-					if reflect.DeepEqual(im.Environment().Environment, azure.PublicCloud) {
-						endpoint = "https://admin.management.azure.com"
-					}
-					if req.URL.String() != endpoint+"/metadata/authentication?api-version=2015-01-01" {
+					if req.URL.String() != strings.TrimSuffix(im.Environment().ResourceManagerEndpoint, "/")+":24582/metadata/authentication?api-version=2015-01-01" {
 						return nil, fmt.Errorf("unexpected URL %q", req.URL.String())
 					}
 					return tt.do(req)

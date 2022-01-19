@@ -48,8 +48,7 @@ func (r *MachineConfigReconciler) Reconcile(ctx context.Context, request ctrl.Re
 		return reconcile.Result{}, err
 	}
 
-	if !instance.Spec.OperatorFlags.GetSimpleBoolean(ENABLED) {
-		// controller is disabled
+	if !instance.Spec.Features.ReconcileDNSMasq {
 		return reconcile.Result{}, nil
 	}
 

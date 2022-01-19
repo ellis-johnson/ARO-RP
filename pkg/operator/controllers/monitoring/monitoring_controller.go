@@ -29,11 +29,6 @@ import (
 	"github.com/Azure/ARO-RP/pkg/operator/controllers"
 )
 
-const (
-	CONFIG_NAMESPACE string = "aro.monitoring"
-	ENABLED          string = CONFIG_NAMESPACE + ".enabled"
-)
-
 var (
 	monitoringName   = types.NamespacedName{Name: "cluster-monitoring-config", Namespace: "openshift-monitoring"}
 	prometheusLabels = "app=prometheus,prometheus=k8s"
@@ -79,8 +74,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.
 		return reconcile.Result{}, err
 	}
 
-	if !instance.Spec.OperatorFlags.GetSimpleBoolean(ENABLED) {
-		// controller is disabled
+	if !instance.Spec.Features.ReconcileMonitoringConfig {
 		return reconcile.Result{}, nil
 	}
 

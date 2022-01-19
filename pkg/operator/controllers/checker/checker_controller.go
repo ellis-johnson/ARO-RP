@@ -9,7 +9,6 @@ import (
 
 	maoclient "github.com/openshift/machine-api-operator/pkg/generated/clientset/versioned"
 	"github.com/sirupsen/logrus"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -23,18 +22,12 @@ import (
 	"github.com/Azure/ARO-RP/pkg/operator/controllers"
 )
 
-const (
-	CONFIG_NAMESPACE string = "aro.checker"
-	ENABLED          string = CONFIG_NAMESPACE + ".enabled"
-)
-
 // Reconciler runs a number of checkers
 type Reconciler struct {
 	log *logrus.Entry
 
 	role     string
 	checkers []Checker
-	arocli   aroclient.Interface
 }
 
 func NewReconciler(log *logrus.Entry, arocli aroclient.Interface, kubernetescli kubernetes.Interface, maocli maoclient.Interface, role string) *Reconciler {
@@ -50,7 +43,6 @@ func NewReconciler(log *logrus.Entry, arocli aroclient.Interface, kubernetescli 
 		log:      log,
 		role:     role,
 		checkers: checkers,
-		arocli:   arocli,
 	}
 }
 
@@ -62,16 +54,7 @@ func NewReconciler(log *logrus.Entry, arocli aroclient.Interface, kubernetescli 
 
 // Reconcile will keep checking that the cluster can connect to essential services.
 func (r *Reconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
-	instance, err := r.arocli.AroV1alpha1().Clusters().Get(ctx, arov1alpha1.SingletonClusterName, metav1.GetOptions{})
-	if err != nil {
-		return reconcile.Result{}, err
-	}
-
-	if !instance.Spec.OperatorFlags.GetSimpleBoolean(ENABLED) {
-		// controller is disabled
-		return reconcile.Result{}, nil
-	}
-
+	var err error
 	for _, c := range r.checkers {
 		thisErr := c.Check(ctx)
 		if thisErr != nil {

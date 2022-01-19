@@ -24,11 +24,6 @@ import (
 	"github.com/Azure/ARO-RP/pkg/operator/controllers"
 )
 
-const (
-	CONFIG_NAMESPACE string = "aro.alertwebhook"
-	ENABLED          string = CONFIG_NAMESPACE + ".enabled"
-)
-
 var alertManagerName = types.NamespacedName{Name: "alertmanager-main", Namespace: "openshift-monitoring"}
 
 // Reconciler reconciles the alertmanager webhook
@@ -54,12 +49,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.
 		return reconcile.Result{}, err
 	}
 
-	if !instance.Spec.OperatorFlags.GetSimpleBoolean(ENABLED) {
-		// controller is disabled
+	if !instance.Spec.Features.ReconcileAlertWebhook {
 		return reconcile.Result{}, nil
 	}
 
-	return reconcile.Result{}, r.setAlertManagerWebhook(ctx, "http://aro-operator-master.openshift-azure-operator.svc.cluster.local:8080/healthz/ready")
+	return reconcile.Result{}, r.setAlertManagerWebhook(ctx, "http://aro-operator-master.openshift-azure-operator.svc.cluster.local:8080")
 }
 
 // setAlertManagerWebhook is a hack to disable the

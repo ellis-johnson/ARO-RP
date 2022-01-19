@@ -8,8 +8,6 @@ import (
 
 	mgmtkeyvault "github.com/Azure/azure-sdk-for-go/services/keyvault/mgmt/2019-09-01/keyvault"
 	"github.com/Azure/go-autorest/autorest"
-
-	"github.com/Azure/ARO-RP/pkg/util/azureclient"
 )
 
 // VaultsClient is a minimal interface for azure VaultsClient
@@ -23,9 +21,9 @@ type vaultsClient struct {
 
 var _ VaultsClient = &vaultsClient{}
 
-// NewVaultsClient creates a new KeyvaultClient
-func NewVaultsClient(environment *azureclient.AROEnvironment, subscriptionID string, authorizer autorest.Authorizer) VaultsClient {
-	client := mgmtkeyvault.NewVaultsClientWithBaseURI(environment.ResourceManagerEndpoint, subscriptionID)
+// NewDisksClient creates a new DisksClient
+func NewVaultsClient(subscriptionID string, authorizer autorest.Authorizer) VaultsClient {
+	client := mgmtkeyvault.NewVaultsClient(subscriptionID)
 	client.Authorizer = authorizer
 
 	return &vaultsClient{

@@ -7,18 +7,10 @@ import (
 	"strings"
 )
 
-// IsOpenShift returns true if ns is an openshift managed namespace, including the default namespace
+// IsOpenShift returns true if ns is an openshift managed namespace.
 func IsOpenShift(ns string) bool {
 	return ns == "" ||
 		ns == "default" ||
-		ns == "openshift" ||
-		strings.HasPrefix(ns, "kube-") ||
-		strings.HasPrefix(ns, "openshift-")
-}
-
-// IsOpenShiftSystemNamespace returns true if ns is an openshift managed namespace, without the default namespace
-func IsOpenShiftSystemNamespace(ns string) bool {
-	return ns == "" ||
 		ns == "openshift" ||
 		strings.HasPrefix(ns, "kube-") ||
 		strings.HasPrefix(ns, "openshift-")

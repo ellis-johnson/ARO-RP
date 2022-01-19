@@ -69,11 +69,6 @@ func TestMachineReconciler(t *testing.T) {
 	baseCluster := arov1alpha1.Cluster{
 		ObjectMeta: metav1.ObjectMeta{Name: "cluster"},
 		Status:     arov1alpha1.ClusterStatus{Conditions: []operatorv1.OperatorCondition{}},
-		Spec: arov1alpha1.ClusterSpec{
-			OperatorFlags: arov1alpha1.OperatorFlags{
-				ENABLED: "true",
-			},
-		},
 	}
 
 	tests := []struct {

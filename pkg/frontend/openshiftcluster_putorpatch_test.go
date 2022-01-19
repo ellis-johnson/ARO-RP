@@ -81,7 +81,6 @@ func TestPutOrPatchOpenShiftClusterAdminAPI(t *testing.T) {
 						Tags: map[string]string{"tag": "will-be-kept"},
 						Properties: api.OpenShiftClusterProperties{
 							ProvisioningState: api.ProvisioningStateSucceeded,
-							OperatorFlags:     api.OperatorFlags{"testFlag": "true"},
 						},
 					},
 				})
@@ -115,7 +114,6 @@ func TestPutOrPatchOpenShiftClusterAdminAPI(t *testing.T) {
 							MasterProfile: api.MasterProfile{
 								EncryptionAtHost: api.EncryptionAtHostDisabled,
 							},
-							OperatorFlags: api.OperatorFlags{"testFlag": "true"},
 						},
 					},
 				})
@@ -139,179 +137,6 @@ func TestPutOrPatchOpenShiftClusterAdminAPI(t *testing.T) {
 					MasterProfile: admin.MasterProfile{
 						EncryptionAtHost: admin.EncryptionAtHostDisabled,
 					},
-					OperatorFlags: admin.OperatorFlags{"testFlag": "true"},
-				},
-			},
-		},
-		{
-			name: "patch with flags merges the flags together",
-			request: func(oc *admin.OpenShiftCluster) {
-				oc.Properties.MaintenanceTask = admin.MaintenanceTaskOperator
-				oc.Properties.OperatorFlags = admin.OperatorFlags{"exploding-flag": "true", "overwrittenFlag": "true"}
-			},
-			isPatch: true,
-			fixture: func(f *testdatabase.Fixture) {
-				f.AddSubscriptionDocuments(&api.SubscriptionDocument{
-					ID: mockSubID,
-					Subscription: &api.Subscription{
-						State: api.SubscriptionStateRegistered,
-					},
-				})
-				f.AddOpenShiftClusterDocuments(&api.OpenShiftClusterDocument{
-					Key: strings.ToLower(testdatabase.GetResourcePath(mockSubID, "resourceName")),
-					OpenShiftCluster: &api.OpenShiftCluster{
-						ID:   testdatabase.GetResourcePath(mockSubID, "resourceName"),
-						Type: "Microsoft.RedHatOpenShift/openShiftClusters",
-
-						Tags: map[string]string{"tag": "will-be-kept"},
-						Properties: api.OpenShiftClusterProperties{
-							ClusterProfile: api.ClusterProfile{
-								FipsValidatedModules: api.FipsValidatedModulesDisabled,
-							},
-							ProvisioningState: api.ProvisioningStateSucceeded,
-							OperatorFlags:     api.OperatorFlags{"testFlag": "true", "overwrittenFlag": "false"},
-						},
-					},
-				})
-			},
-			wantSystemDataEnriched: true,
-			wantEnriched:           []string{testdatabase.GetResourcePath(mockSubID, "resourceName")},
-			wantDocuments: func(c *testdatabase.Checker) {
-				c.AddAsyncOperationDocuments(&api.AsyncOperationDocument{
-					OpenShiftClusterKey: strings.ToLower(testdatabase.GetResourcePath(mockSubID, "resourceName")),
-					AsyncOperation: &api.AsyncOperation{
-						InitialProvisioningState: api.ProvisioningStateAdminUpdating,
-						ProvisioningState:        api.ProvisioningStateAdminUpdating,
-					},
-				})
-				c.AddOpenShiftClusterDocuments(&api.OpenShiftClusterDocument{
-					Key: strings.ToLower(testdatabase.GetResourcePath(mockSubID, "resourceName")),
-					OpenShiftCluster: &api.OpenShiftCluster{
-						ID:   testdatabase.GetResourcePath(mockSubID, "resourceName"),
-						Type: "Microsoft.RedHatOpenShift/openShiftClusters",
-						Tags: map[string]string{"tag": "will-be-kept"},
-						Properties: api.OpenShiftClusterProperties{
-							ProvisioningState:     api.ProvisioningStateAdminUpdating,
-							LastProvisioningState: api.ProvisioningStateSucceeded,
-							MaintenanceTask:       api.MaintenanceTaskOperator,
-							ClusterProfile: api.ClusterProfile{
-								FipsValidatedModules: api.FipsValidatedModulesDisabled,
-							},
-							NetworkProfile: api.NetworkProfile{
-								SoftwareDefinedNetwork: api.SoftwareDefinedNetworkOpenShiftSDN,
-							},
-							MasterProfile: api.MasterProfile{
-								EncryptionAtHost: api.EncryptionAtHostDisabled,
-							},
-							OperatorFlags: api.OperatorFlags{"exploding-flag": "true", "overwrittenFlag": "true", "testFlag": "true"},
-						},
-					},
-				})
-			},
-			wantAsync:      true,
-			wantStatusCode: http.StatusOK,
-			wantResponse: &admin.OpenShiftCluster{
-				ID:   testdatabase.GetResourcePath(mockSubID, "resourceName"),
-				Type: "Microsoft.RedHatOpenShift/openShiftClusters",
-				Tags: map[string]string{"tag": "will-be-kept"},
-				Properties: admin.OpenShiftClusterProperties{
-					ProvisioningState:     admin.ProvisioningStateAdminUpdating,
-					LastProvisioningState: admin.ProvisioningStateSucceeded,
-					MaintenanceTask:       admin.MaintenanceTaskOperator,
-					NetworkProfile: admin.NetworkProfile{
-						SoftwareDefinedNetwork: admin.SoftwareDefinedNetworkOpenShiftSDN,
-					},
-					ClusterProfile: admin.ClusterProfile{
-						FipsValidatedModules: admin.FipsValidatedModulesDisabled,
-					},
-					MasterProfile: admin.MasterProfile{
-						EncryptionAtHost: admin.EncryptionAtHostDisabled,
-					},
-					OperatorFlags: admin.OperatorFlags{"exploding-flag": "true", "overwrittenFlag": "true", "testFlag": "true"},
-				},
-			},
-		},
-		{
-			name: "patch an existing cluster with no flags in db will use defaults",
-			request: func(oc *admin.OpenShiftCluster) {
-			},
-			isPatch: true,
-			fixture: func(f *testdatabase.Fixture) {
-				f.AddSubscriptionDocuments(&api.SubscriptionDocument{
-					ID: mockSubID,
-					Subscription: &api.Subscription{
-						State: api.SubscriptionStateRegistered,
-					},
-				})
-				f.AddOpenShiftClusterDocuments(&api.OpenShiftClusterDocument{
-					Key: strings.ToLower(testdatabase.GetResourcePath(mockSubID, "resourceName")),
-					OpenShiftCluster: &api.OpenShiftCluster{
-						ID:   testdatabase.GetResourcePath(mockSubID, "resourceName"),
-						Type: "Microsoft.RedHatOpenShift/openShiftClusters",
-						Tags: map[string]string{"tag": "will-be-kept"},
-						Properties: api.OpenShiftClusterProperties{
-							ProvisioningState: api.ProvisioningStateSucceeded,
-							ClusterProfile: api.ClusterProfile{
-								FipsValidatedModules: api.FipsValidatedModulesDisabled,
-							},
-						},
-					},
-				})
-			},
-			wantSystemDataEnriched: true,
-			wantEnriched:           []string{testdatabase.GetResourcePath(mockSubID, "resourceName")},
-			wantDocuments: func(c *testdatabase.Checker) {
-				c.AddAsyncOperationDocuments(&api.AsyncOperationDocument{
-					OpenShiftClusterKey: strings.ToLower(testdatabase.GetResourcePath(mockSubID, "resourceName")),
-					AsyncOperation: &api.AsyncOperation{
-						InitialProvisioningState: api.ProvisioningStateAdminUpdating,
-						ProvisioningState:        api.ProvisioningStateAdminUpdating,
-					},
-				})
-				c.AddOpenShiftClusterDocuments(&api.OpenShiftClusterDocument{
-					Key: strings.ToLower(testdatabase.GetResourcePath(mockSubID, "resourceName")),
-					OpenShiftCluster: &api.OpenShiftCluster{
-						ID:   testdatabase.GetResourcePath(mockSubID, "resourceName"),
-						Type: "Microsoft.RedHatOpenShift/openShiftClusters",
-						Tags: map[string]string{"tag": "will-be-kept"},
-						Properties: api.OpenShiftClusterProperties{
-							ProvisioningState:     api.ProvisioningStateAdminUpdating,
-							LastProvisioningState: api.ProvisioningStateSucceeded,
-							MaintenanceTask:       api.MaintenanceTaskEverything,
-							NetworkProfile: api.NetworkProfile{
-								SoftwareDefinedNetwork: api.SoftwareDefinedNetworkOpenShiftSDN,
-							},
-							ClusterProfile: api.ClusterProfile{
-								FipsValidatedModules: api.FipsValidatedModulesDisabled,
-							},
-							MasterProfile: api.MasterProfile{
-								EncryptionAtHost: api.EncryptionAtHostDisabled,
-							},
-							OperatorFlags: api.DefaultOperatorFlags.Copy(),
-						},
-					},
-				})
-			},
-			wantAsync:      true,
-			wantStatusCode: http.StatusOK,
-			wantResponse: &admin.OpenShiftCluster{
-				ID:   testdatabase.GetResourcePath(mockSubID, "resourceName"),
-				Type: "Microsoft.RedHatOpenShift/openShiftClusters",
-				Tags: map[string]string{"tag": "will-be-kept"},
-				Properties: admin.OpenShiftClusterProperties{
-					ProvisioningState:     admin.ProvisioningStateAdminUpdating,
-					LastProvisioningState: admin.ProvisioningStateSucceeded,
-					MaintenanceTask:       admin.MaintenanceTaskEverything,
-					NetworkProfile: admin.NetworkProfile{
-						SoftwareDefinedNetwork: admin.SoftwareDefinedNetworkOpenShiftSDN,
-					},
-					MasterProfile: admin.MasterProfile{
-						EncryptionAtHost: admin.EncryptionAtHostDisabled,
-					},
-					ClusterProfile: admin.ClusterProfile{
-						FipsValidatedModules: admin.FipsValidatedModulesDisabled,
-					},
-					OperatorFlags: admin.OperatorFlags(api.DefaultOperatorFlags.Copy()),
 				},
 			},
 		},
@@ -369,7 +194,6 @@ func TestPutOrPatchOpenShiftClusterAdminAPI(t *testing.T) {
 							MasterProfile: api.MasterProfile{
 								EncryptionAtHost: api.EncryptionAtHostDisabled,
 							},
-							OperatorFlags: api.DefaultOperatorFlags.Copy(),
 						},
 					},
 				})
@@ -393,7 +217,6 @@ func TestPutOrPatchOpenShiftClusterAdminAPI(t *testing.T) {
 					MasterProfile: admin.MasterProfile{
 						EncryptionAtHost: admin.EncryptionAtHostDisabled,
 					},
-					OperatorFlags: admin.OperatorFlags(api.DefaultOperatorFlags.Copy()),
 				},
 			},
 		},
@@ -419,7 +242,6 @@ func TestPutOrPatchOpenShiftClusterAdminAPI(t *testing.T) {
 						Properties: api.OpenShiftClusterProperties{
 							ProvisioningState: api.ProvisioningStateSucceeded,
 							MaintenanceTask:   api.MaintenanceTaskEverything,
-							OperatorFlags:     api.OperatorFlags{"testFlag": "true"},
 						},
 					},
 				})
@@ -453,7 +275,6 @@ func TestPutOrPatchOpenShiftClusterAdminAPI(t *testing.T) {
 							MasterProfile: api.MasterProfile{
 								EncryptionAtHost: api.EncryptionAtHostDisabled,
 							},
-							OperatorFlags: api.OperatorFlags{"testFlag": "true"},
 						},
 					},
 				})
@@ -477,7 +298,6 @@ func TestPutOrPatchOpenShiftClusterAdminAPI(t *testing.T) {
 					MasterProfile: admin.MasterProfile{
 						EncryptionAtHost: admin.EncryptionAtHostDisabled,
 					},
-					OperatorFlags: admin.OperatorFlags{"testFlag": "true"},
 				},
 			},
 		},
@@ -721,7 +541,6 @@ func TestPutOrPatchOpenShiftCluster(t *testing.T) {
 							FeatureProfile: api.FeatureProfile{
 								GatewayEnabled: false,
 							},
-							OperatorFlags: api.DefaultOperatorFlags.Copy(),
 						},
 					},
 				})
@@ -780,7 +599,6 @@ func TestPutOrPatchOpenShiftCluster(t *testing.T) {
 							MasterProfile: api.MasterProfile{
 								EncryptionAtHost: api.EncryptionAtHostDisabled,
 							},
-							OperatorFlags: api.OperatorFlags{},
 						},
 					},
 				})
@@ -818,7 +636,6 @@ func TestPutOrPatchOpenShiftCluster(t *testing.T) {
 							MasterProfile: api.MasterProfile{
 								EncryptionAtHost: api.EncryptionAtHostDisabled,
 							},
-							OperatorFlags: api.OperatorFlags{},
 						},
 					},
 				})
@@ -865,7 +682,6 @@ func TestPutOrPatchOpenShiftCluster(t *testing.T) {
 							FailedProvisioningState: api.ProvisioningStateUpdating,
 							IngressProfiles:         []api.IngressProfile{{Name: "will-be-removed"}},
 							WorkerProfiles:          []api.WorkerProfile{{Name: "will-be-removed"}},
-							OperatorFlags:           api.OperatorFlags{},
 						},
 					},
 				})
@@ -899,7 +715,6 @@ func TestPutOrPatchOpenShiftCluster(t *testing.T) {
 							MasterProfile: api.MasterProfile{
 								EncryptionAtHost: api.EncryptionAtHostDisabled,
 							},
-							OperatorFlags: api.OperatorFlags{},
 						},
 					},
 				})
@@ -949,7 +764,6 @@ func TestPutOrPatchOpenShiftCluster(t *testing.T) {
 							MasterProfile: api.MasterProfile{
 								EncryptionAtHost: api.EncryptionAtHostDisabled,
 							},
-							OperatorFlags: api.OperatorFlags{},
 						},
 					},
 				})
@@ -987,7 +801,6 @@ func TestPutOrPatchOpenShiftCluster(t *testing.T) {
 							MasterProfile: api.MasterProfile{
 								EncryptionAtHost: api.EncryptionAtHostDisabled,
 							},
-							OperatorFlags: api.OperatorFlags{},
 						},
 					},
 				})
@@ -1035,7 +848,6 @@ func TestPutOrPatchOpenShiftCluster(t *testing.T) {
 							MasterProfile: api.MasterProfile{
 								EncryptionAtHost: api.EncryptionAtHostDisabled,
 							},
-							OperatorFlags: api.OperatorFlags{},
 						},
 					},
 				})
@@ -1076,7 +888,6 @@ func TestPutOrPatchOpenShiftCluster(t *testing.T) {
 							MasterProfile: api.MasterProfile{
 								EncryptionAtHost: api.EncryptionAtHostDisabled,
 							},
-							OperatorFlags: api.OperatorFlags{},
 						},
 					},
 				})
@@ -1141,7 +952,6 @@ func TestPutOrPatchOpenShiftCluster(t *testing.T) {
 							MasterProfile: api.MasterProfile{
 								EncryptionAtHost: api.EncryptionAtHostDisabled,
 							},
-							OperatorFlags: api.OperatorFlags{},
 						},
 					},
 				})
@@ -1183,7 +993,6 @@ func TestPutOrPatchOpenShiftCluster(t *testing.T) {
 							MasterProfile: api.MasterProfile{
 								EncryptionAtHost: api.EncryptionAtHostDisabled,
 							},
-							OperatorFlags: api.OperatorFlags{},
 						},
 					},
 				})
@@ -1240,7 +1049,6 @@ func TestPutOrPatchOpenShiftCluster(t *testing.T) {
 							MasterProfile: api.MasterProfile{
 								EncryptionAtHost: api.EncryptionAtHostDisabled,
 							},
-							OperatorFlags: api.OperatorFlags{},
 						},
 					},
 				})
@@ -1282,7 +1090,6 @@ func TestPutOrPatchOpenShiftCluster(t *testing.T) {
 							MasterProfile: api.MasterProfile{
 								EncryptionAtHost: api.EncryptionAtHostDisabled,
 							},
-							OperatorFlags: api.OperatorFlags{},
 						},
 					},
 				})
@@ -1326,7 +1133,6 @@ func TestPutOrPatchOpenShiftCluster(t *testing.T) {
 							MasterProfile: api.MasterProfile{
 								EncryptionAtHost: api.EncryptionAtHostDisabled,
 							},
-							OperatorFlags: api.OperatorFlags{},
 						},
 					},
 				})
@@ -1370,7 +1176,6 @@ func TestPutOrPatchOpenShiftCluster(t *testing.T) {
 							MasterProfile: api.MasterProfile{
 								EncryptionAtHost: api.EncryptionAtHostDisabled,
 							},
-							OperatorFlags: api.OperatorFlags{},
 						},
 					},
 				})

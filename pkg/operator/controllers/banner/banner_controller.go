@@ -23,11 +23,6 @@ import (
 	"github.com/Azure/ARO-RP/pkg/operator/controllers"
 )
 
-const (
-	CONFIG_NAMESPACE string = "aro.banner"
-	ENABLED          string = CONFIG_NAMESPACE + ".enabled"
-)
-
 // BannerReconciler is the controller struct
 type Reconciler struct {
 	log *logrus.Entry
@@ -52,8 +47,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.
 		return reconcile.Result{}, err
 	}
 
-	if !instance.Spec.OperatorFlags.GetSimpleBoolean(ENABLED) {
-		// controller is disabled
+	if !instance.Spec.Features.ReconcileBanner {
+		// reconciling Banners is disabled
 		return reconcile.Result{}, nil
 	}
 
