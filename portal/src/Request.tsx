@@ -13,7 +13,7 @@ export const FetchClusters = async (): Promise<AxiosResponse | null> => {
   try {
     const result = await axios("/api/clusters")
     return result
-  } catch (e) {
+  } catch (e: any) {
     let err = e.response as AxiosResponse
     return OnError(err)
   }
@@ -23,7 +23,7 @@ export const FetchClusterInfo = async (subscription: string, resourceGroup: stri
   try {
     const result = await axios("/api/" + subscription + "/" + resourceGroup +  "/" + name + "/clusterinfo")
     return result
-  } catch (e) {
+  } catch (e: any) {
     let err = e.response as AxiosResponse
     return OnError(err)
   }
@@ -33,7 +33,7 @@ export const FetchInfo = async (): Promise<AxiosResponse | null> => {
   try {
     const result = await axios("/api/info")
     return result
-  } catch (e) {
+  } catch (e: any) {
     let err = e.response as AxiosResponse
     return OnError(err)
   }
@@ -43,7 +43,7 @@ export const FetchNodes = async (subscription: string, resourceGroup: string, na
   try {
     const result = await axios("/api/" + subscription + "/" + resourceGroup + "/" + name + "/nodes")
     return result
-  } catch (e) {
+  } catch (e: any) {
     let err = e.response as AxiosResponse
     return OnError(err)
   }
@@ -53,7 +53,7 @@ export const FetchMachines = async (subscription: string, resourceGroup: string,
   try {
     const result = await axios("/api/" + subscription + "/" + resourceGroup + "/" + name + "/machines")
     return result
-  } catch (e) {
+  } catch (e: any) {
     let err = e.response as AxiosResponse
     return OnError(err)
   }
@@ -63,7 +63,7 @@ export const FetchMachineSets = async (subscription: string, resourceGroup: stri
   try {
     const result = await axios("/api/" + subscription + "/" + resourceGroup + "/" + name + "/machinesets")
     return result
-  } catch (e) {
+  } catch (e: any) {
     let err = e.response as AxiosResponse
     return OnError(err)
   }
@@ -73,7 +73,7 @@ export const ProcessLogOut = async (): Promise<any> => {
   try {
     const result = await axios({method: "POST", url: "/api/logout"})
     return result
-  } catch (e) {
+  } catch (e: any) {
     let err = e.response as AxiosResponse
     console.log(err)
   }
@@ -93,7 +93,7 @@ export const RequestKubeconfig = async (
       },
     })
     return result
-  } catch (e) {
+  } catch (e: any) {
     let err = e.response as AxiosResponse
     return OnError(err)
   }
