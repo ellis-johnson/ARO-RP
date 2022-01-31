@@ -13,6 +13,7 @@ import (
 type MachineSetsInformation struct {
 	Name            string `json:"name"`
 	Type            string `json:"type"`
+	CreatedAt       string `json:"createdat"`
 	DesiredReplicas int    `json:"desiredreplicas"`
 	Replicas        int    `json:"replicas"`
 	ErrorReason     string `json:"errorreason"`
@@ -42,8 +43,9 @@ func MachineSetsFromMachineSetList(machineSets *machineapi.MachineSetList) *Mach
 		final.MachineSets = append(final.MachineSets, MachineSetsInformation{
 			Name:            machineSet.Name,
 			Type:            machineSet.ObjectMeta.Labels["machine.openshift.io/cluster-api-machine-type"],
-			Replicas:        int(machineSet.Status.Replicas),
+			CreatedAt:       machineSet.ObjectMeta.CreationTimestamp.String(),
 			DesiredReplicas: int(*machineSet.Spec.Replicas),
+			Replicas:        int(machineSet.Status.Replicas),
 			ErrorReason:     errorReason,
 			ErrorMessage:    errorMessage,
 		})

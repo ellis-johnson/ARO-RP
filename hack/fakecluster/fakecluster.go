@@ -92,12 +92,12 @@ func run(ctx context.Context, l *logrus.Entry) error {
 	).HandlerFunc(resp(cluster.MustAsset("nodes.json")))
 
 	r.NewRoute().PathPrefix(
-		"/apis/machine.openshift.io/v1beta1/machines",
-	).HandlerFunc(resp(cluster.MustAsset("machines.json")))
-
-	r.NewRoute().PathPrefix(
 		"/apis/machine.openshift.io/v1beta1/machinesets",
 	).HandlerFunc(resp(cluster.MustAsset("machinesets.json")))
+
+	r.NewRoute().PathPrefix(
+		"/apis/machine.openshift.io/v1beta1/machines",
+	).HandlerFunc(resp(cluster.MustAsset("machines.json")))
 
 	s := &http.Server{
 		Handler:     frontendmiddleware.Lowercase(r),

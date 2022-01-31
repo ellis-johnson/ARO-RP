@@ -61,7 +61,7 @@ export const FetchMachines = async (subscription: string, resourceGroup: string,
 
 export const FetchMachineSets = async (subscription: string, resourceGroup: string, name: string): Promise<AxiosResponse | null> => {
   try {
-    const result = await axios("/api/" + subscription + "/" + resourceGroup + "/" + name + "/machinesets")
+    const result = await axios("/api/" + subscription + "/" + resourceGroup + "/" + name + "/machine-sets")
     return result
   } catch (e: any) {
     let err = e.response as AxiosResponse

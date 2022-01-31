@@ -56,6 +56,7 @@ func TestMachineSets(t *testing.T) {
 			{
 				Name:            "aro-v4-shared-gxqb4-infra-eastus1",
 				Type:            "infra",
+				CreatedAt:       "2021-03-09T13:48:16Z",
 				DesiredReplicas: 0,
 				Replicas:        0,
 				ErrorReason:     "None",

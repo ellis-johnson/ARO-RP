@@ -3,6 +3,7 @@ import { OverviewWrapper } from './ClusterDetailListComponents/OverviewWrapper';
 import { NodesWrapper } from './ClusterDetailListComponents/NodesWrapper';
 import { MachinesWrapper } from "./ClusterDetailListComponents/MachinesWrapper";
 import { IClusterDetail } from "./App";
+import { MachineSetsWrapper } from "./ClusterDetailListComponents/MachineSetsWrapper";
 
 interface ClusterDetailComponentProps {
   item: any
@@ -61,6 +62,12 @@ export class ClusterDetailComponent extends Component<ClusterDetailComponentProp
         {
           return (
             <MachinesWrapper currentCluster={this.props.clusterInfo} detailPanelSelected={this.props.detailPanelSelected} loaded={this.props.loaded}/>
+          );
+        }
+        case "machinesets":
+        {
+          return (
+            <MachineSetsWrapper currentCluster={this.props.clusterInfo} detailPanelSelected={this.props.detailPanelSelected} loaded={this.props.loaded}/>
           );
         }
       }
