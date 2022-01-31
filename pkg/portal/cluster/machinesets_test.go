@@ -52,8 +52,10 @@ func TestMachineSets(t *testing.T) {
 	}
 
 	expected := &MachineSetListInformation{
-		MachineSets: []MachinesetsInformation{
+		MachineSets: []MachineSetsInformation{
 			{
+				Name:            "aro-v4-shared-gxqb4-infra-eastus1",
+				Type:            "infra",
 				DesiredReplicas: 0,
 				Replicas:        0,
 				ErrorReason:     "None",

@@ -10,20 +10,22 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type MachinesetsInformation struct {
+type MachineSetsInformation struct {
+	Name            string `json:"name"`
+	Type            string `json:"type"`
 	DesiredReplicas int    `json:"desiredreplicas"`
-	Replicas        int    `json:"replicas`
+	Replicas        int    `json:"replicas"`
 	ErrorReason     string `json:"errorreason"`
 	ErrorMessage    string `json:"errormessage"`
 }
 
 type MachineSetListInformation struct {
-	MachineSets []MachinesetsInformation `json:"machines"`
+	MachineSets []MachineSetsInformation `json:"machines"`
 }
 
 func MachineSetsFromMachineSetList(machineSets *machineapi.MachineSetList) *MachineSetListInformation {
 	final := &MachineSetListInformation{
-		MachineSets: make([]MachinesetsInformation, 0, len(machineSets.Items)),
+		MachineSets: make([]MachineSetsInformation, 0, len(machineSets.Items)),
 	}
 
 	for _, machineSet := range machineSets.Items {
@@ -37,7 +39,9 @@ func MachineSetsFromMachineSetList(machineSets *machineapi.MachineSetList) *Mach
 		if machineSet.Status.ErrorMessage != nil {
 			errorMessage = *machineSet.Status.ErrorMessage
 		}
-		final.MachineSets = append(final.MachineSets, MachinesetsInformation{
+		final.MachineSets = append(final.MachineSets, MachineSetsInformation{
+			Name:            machineSet.Name,
+			Type:            machineSet.ObjectMeta.Labels["machine.openshift.io/cluster-api-machine-type"],
 			Replicas:        int(machineSet.Status.Replicas),
 			DesiredReplicas: int(*machineSet.Spec.Replicas),
 			ErrorReason:     errorReason,
