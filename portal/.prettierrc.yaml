@@ -5,6 +5,6 @@ useTabs: false
 semi: false
 singleQuote: false
 printWidth: 100
-bracketSpacing: false
-jsxBracketSameLine: false
+bracketSpacing: true
 quoteProps: "consistent"
+bracketSameLine: true

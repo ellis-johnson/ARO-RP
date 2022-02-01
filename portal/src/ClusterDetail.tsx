@@ -1,44 +1,83 @@
-import { IPanelStyles, Panel, PanelType } from '@fluentui/react/lib/Panel';
-import { useBoolean } from '@fluentui/react-hooks';
-import { useState, useEffect, useRef, MutableRefObject } from "react"
-import { IMessageBarStyles, MessageBar, MessageBarType, Stack, Separator } from '@fluentui/react';
-import { AxiosResponse } from 'axios';
-import { FetchClusterInfo } from './Request';
-import { IClusterDetail, contentStackStylesNormal } from "./App"
-import { Nav, INavLink, INavLinkGroup, INavStyles } from '@fluentui/react/lib/Nav';
-import { ClusterDetailComponent } from './ClusterDetailList'
-
+import {
+  IPanelHeaderRenderer,
+  IPanelProps,
+  IPanelStyles,
+  Panel,
+  PanelType,
+} from "@fluentui/react/lib/Panel"
+import { useBoolean } from "@fluentui/react-hooks"
+import { useState, useEffect, useRef, MutableRefObject, ReactElement } from "react"
+import {
+  IMessageBarStyles,
+  MessageBar,
+  MessageBarType,
+  Stack,
+  Separator,
+  IStackStyles,
+  Icon,
+  IIconStyles,
+} from "@fluentui/react"
+import { AxiosResponse } from "axios"
+import { FetchClusterInfo } from "./Request"
+import { ICluster, headerStyles } from "./App"
+import { Nav, INavLink, INavLinkGroup, INavStyles } from "@fluentui/react/lib/Nav"
+import { ClusterDetailComponent } from "./ClusterDetailList"
+import React from "react"
 
 const navStyles: Partial<INavStyles> = {
   root: {
     width: 155,
-    paddingRight: "10px"
+    paddingRight: "10px",
   },
   link: {
-    whiteSpace: 'normal',
-    lineHeight: 'inherit',
+    whiteSpace: "normal",
+    lineHeight: "inherit",
   },
   groupContent: {
-    marginBottom: "0px"
-  }
-};
+    marginBottom: "0px",
+  },
+}
+
+const customPanelStyle: Partial<IPanelStyles> = {
+  root: { top: "40px", left: "225px" },
+  content: { paddingLeft: 30, paddingRight: 5 },
+  navigation: {
+    justifyContent: "flex-start",
+  },
+}
+
+const headerStyle: Partial<IStackStyles> = {
+  root: {
+    alignSelf: "flex-start",
+    flexGrow: 2,
+    height: 48,
+    paddingLeft: 30,
+    marginBottom: 15,
+  },
+}
+
+const headerIconStyles: Partial<IIconStyles> = {
+  root: {
+    height: "100%",
+    width: 40,
+    paddingTop: 4,
+    paddingRight: 10,
+    svg: {
+      fill: "#e3222f",
+    },
+  },
+}
 
 export const overviewKey = "overview"
 export const nodesKey = "nodes"
 export const machinesKey = "machines"
 export const machineSetsKey = "machinesets"
 
-const customPanelStyle: Partial<IPanelStyles> = {
-  root: { top: "40px", left: "225px" },
-  content: { paddingLeft: 5, paddingRight: 5, },
-}
-
 const errorBarStyles: Partial<IMessageBarStyles> = { root: { marginBottom: 15 } }
 
 export function ClusterDetailPanel(props: {
   csrfToken: MutableRefObject<string>
-  currentCluster: IClusterDetail
-  detailPanelSelected: string
+  currentCluster: ICluster | null
   onClose: any // TODO: function ptr .. any probably bad
   loaded: string
 }) {
@@ -46,8 +85,9 @@ export function ClusterDetailPanel(props: {
   const [error, setError] = useState<AxiosResponse | null>(null)
   const state = useRef<ClusterDetailComponent>(null)
   const [fetching, setFetching] = useState("")
-  const [isOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false); // panel controls
-  const [detailPanelSelected, setPanelSelected] = useState(props.detailPanelSelected)
+  const [isOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false) // panel controls
+  const [dataLoaded, setDataLoaded] = useState<boolean>(false)
+  const [detailPanelVisible, setdetailPanelVisible] = useState<string>("Overview")
 
   const errorBar = (): any => {
     return (
@@ -56,12 +96,42 @@ export function ClusterDetailPanel(props: {
         isMultiline={false}
         onDismiss={() => setError(null)}
         dismissButtonAriaLabel="Close"
-        styles={errorBarStyles}
-      >
+        styles={errorBarStyles}>
         {error?.statusText}
       </MessageBar>
     )
   }
+
+  const navLinkGroups = [
+    {
+      links: [
+        {
+          name: 'Overview',
+          key: overviewKey,
+          url: '#overview',
+          icon: 'ThisPC',
+        },
+        {
+          name: 'Nodes',
+          key: nodesKey,
+          url: '#nodes',
+          icon: 'BuildQueue',
+        },
+        {
+          name: 'Machines',
+          key: machinesKey,
+          url: '#machines',
+          icon: 'BuildQueue',
+        },
+        {
+          name: 'MachineSets',
+          key: machineSetsKey,
+          url: '#machinesets',
+          icon: 'BuildQueue',
+        },
+      ],
+    },
+  ];
 
   // updateData - updates the state of the component
   // can be used if we want a refresh button.
@@ -69,87 +139,87 @@ export function ClusterDetailPanel(props: {
   const updateData = (newData: any) => {
     setData(newData)
     if (state && state.current) {
-      state.current.setState({ item: newData, detailPanelSelected: props.detailPanelSelected })
+      state.current.setState({ item: newData })
     }
   }
 
   const _dismissPanel = () => {
     dismissPanel()
-    props.currentCluster.clusterName = ""
     props.onClose() // useEffect?
+    setData([])
+    setFetching("")
+    setDataLoaded(false)
+    setError(null)
   }
 
   useEffect(() => {
+    if (props.currentCluster == null) {
+      return
+    }
+    const resourceID = props.currentCluster.resourceId
+
     const onData = (result: AxiosResponse | null) => {
       if (result?.status === 200) {
         updateData(result.data)
+        setDataLoaded(true)
       } else {
         setError(result)
       }
-      setFetching(props.currentCluster.clusterName)
+      setFetching(resourceID)
     }
 
-    if (fetching === "" && props.loaded === "DONE" && props.currentCluster.clusterName != "") {
+    if (fetching === "" && props.loaded === "DONE" && resourceID != "") {
       setFetching("FETCHING")
-      FetchClusterInfo(props.currentCluster.subscription, props.currentCluster.resource, props.currentCluster.clusterName).then(onData) // TODO: fetchClusterInfo accepts IClusterDetail
+      setError(null)
+      FetchClusterInfo(props.currentCluster).then(onData) // TODO: fetchClusterInfo accepts IClusterDetail
     }
-  }, [data, props.currentCluster.clusterName, props.loaded])
-
+  }, [data, fetching, setFetching])
 
   useEffect(() => {
-    if (props.currentCluster.clusterName != "") {
-      if (props.currentCluster.clusterName == fetching) {
+    if (props.currentCluster == null) {
+      setDataLoaded(false)
+      return
+    }
+    const resourceID = props.currentCluster.resourceId
+
+    if (resourceID != "") {
+      if (resourceID == fetching) {
         openPanel()
+        setDataLoaded(true)
       } else {
         setData([])
         setFetching("")
+        setDataLoaded(false) // activate shimmer
         openPanel()
       }
     }
-  }, [props.currentCluster.clusterName])
-
-  useEffect(() => {
-    setPanelSelected(props.detailPanelSelected)
-  }, [props.detailPanelSelected, props.currentCluster])
+  }, [props.currentCluster?.resourceId])
 
   function _onLinkClick(ev?: React.MouseEvent<HTMLElement>, item?: INavLink) {
-    if (item && item.key !== '') {
-      setPanelSelected(item.key!)
+    if (item && item.name !== "") {
+      setdetailPanelVisible(item.name)
     }
   }
 
-
-
-  var navLinkGroups = [
-    {
-      links: [
-        {
-          name: 'Overview',
-          key: overviewKey,
-          url: '#' + props.currentCluster.subscription + "/" + props.currentCluster.resource + "/" + props.currentCluster.clusterName + '/overview',
-          icon: 'ThisPC',
-        },
-        {
-          name: 'Nodes',
-          key: nodesKey,
-          url: '#' + props.currentCluster.subscription + "/" + props.currentCluster.resource + "/" + props.currentCluster.clusterName + '/nodes',
-          icon: 'BuildQueue',
-        },
-        {
-          name: 'Machines',
-          key: machinesKey,
-          url: '#' + props.currentCluster.subscription + "/" + props.currentCluster.resource + "/" + props.currentCluster.clusterName + '/machines',
-          icon: 'BuildQueue',
-        },
-        {
-          name: 'MachineSets',
-          key: machineSetsKey,
-          url: '#' + props.currentCluster.subscription + "/" + props.currentCluster.resource + "/" + props.currentCluster.clusterName + '/machinesets',
-          icon: 'BuildQueue',
-        },
-      ],
-    },
-  ];
+  const onRenderHeader = (
+    _props?: IPanelProps,
+    defaultRender?: IPanelHeaderRenderer,
+    headerTextId?: string | undefined
+  ): ReactElement => {
+    return (
+      <>
+        <Stack styles={headerStyle} horizontal>
+          <Stack.Item>
+            <Icon styles={headerIconStyles} iconName="openshift-svg"></Icon>
+          </Stack.Item>
+          <Stack.Item>
+            <div className={headerStyles.titleText}>{props.currentCluster?.name}</div>
+            <div className={headerStyles.subtitleText}>Cluster</div>
+          </Stack.Item>
+        </Stack>
+      </>
+    )
+  }
 
   // TODO: props.loaded rename to CSRFTokenAvailable
   return (
@@ -159,8 +229,9 @@ export function ClusterDetailPanel(props: {
       onDismiss={_dismissPanel}
       isBlocking={false}
       styles={customPanelStyle}
-      closeButtonAriaLabel="Close">
-      <Stack styles={contentStackStylesNormal}>
+      closeButtonAriaLabel="Close"
+      onRenderHeader={onRenderHeader}>
+      <Stack>
         <Stack.Item grow>{error && errorBar()}</Stack.Item>
         <Stack horizontal>
           <Stack.Item>
@@ -169,16 +240,16 @@ export function ClusterDetailPanel(props: {
               ariaLabel="Select a tab to view"
               styles={navStyles}
               groups={navLinkGroups}
-              initialSelectedKey={detailPanelSelected}
             />
           </Stack.Item>
           <Separator vertical />
           <Stack.Item grow>
             <ClusterDetailComponent
               item={data}
-              detailPanelSelected={detailPanelSelected}
-              clusterInfo={props.currentCluster}
-              loaded={props.loaded}/>
+              cluster={props.currentCluster}
+              isDataLoaded={dataLoaded}
+              detailPanelVisible={detailPanelVisible}
+            />
           </Stack.Item>
         </Stack>
       </Stack>

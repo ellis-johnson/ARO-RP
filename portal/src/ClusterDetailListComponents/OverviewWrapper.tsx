@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { AxiosResponse } from 'axios';
 import { FetchClusterInfo } from '../Request';
-import { IClusterDetail } from "../App"
+import { ICluster } from "../App"
 import { ClusterDetailComponent } from '../ClusterDetailList'
 import { OverviewComponent } from './Overview';
 import { IMessageBarStyles, MessageBar, MessageBarType, Stack } from '@fluentui/react';
@@ -10,9 +10,9 @@ import { overviewKey } from "../ClusterDetail";
 const errorBarStyles: Partial<IMessageBarStyles> = { root: { marginBottom: 15 } }
 
 export function OverviewWrapper(props: {
-  currentCluster: IClusterDetail
+  currentCluster: ICluster
   detailPanelSelected: string
-  loaded: string
+  loaded: boolean
 }) {
   const [data, setData] = useState<any>([])
   const [error, setError] = useState<AxiosResponse | null>(null)
@@ -50,23 +50,23 @@ export function OverviewWrapper(props: {
       } else {
         setError(result)
       }
-      setFetching(props.currentCluster.clusterName)
+      setFetching(props.currentCluster.name)
     }
 
     if (props.detailPanelSelected.toLowerCase() == overviewKey && 
         fetching === "" &&
-        props.loaded === "DONE" &&
-        props.currentCluster.clusterName != "") {
+        props.loaded &&
+        props.currentCluster.name != "") {
       setFetching("FETCHING")
-      FetchClusterInfo(props.currentCluster.subscription, props.currentCluster.resource, props.currentCluster.clusterName).then(onData) // TODO: fetchClusterInfo accepts IClusterDetail
+      FetchClusterInfo(props.currentCluster).then(onData) // TODO: fetchClusterInfo accepts IClusterDetail
     }
-  }, [data, props.currentCluster.clusterName, props.loaded])
+  }, [data, props.loaded])
 
   return (
     <Stack>
       <Stack.Item grow>{error && errorBar()}</Stack.Item>
       <Stack>
-        <OverviewComponent item={data} clusterName={props.currentCluster.clusterName}/>
+        <OverviewComponent item={data} clusterName={props.currentCluster != null ? props.currentCluster.name : ""}/>
       </Stack>
     </Stack>   
   )

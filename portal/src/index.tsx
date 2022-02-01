@@ -1,9 +1,8 @@
 import ReactDOM from "react-dom"
 import App from "./App"
-import {mergeStyles} from "@fluentui/react"
+import { mergeStyles } from "@fluentui/react"
 
-import {initializeIcons} from "@fluentui/font-icons-mdl2"
-import { HashRouter } from "react-router-dom"
+import { initializeIcons } from "@fluentui/font-icons-mdl2"
 initializeIcons()
 
 // Inject some global styles
@@ -15,4 +14,4 @@ mergeStyles({
   },
 })
 
-ReactDOM.render(<HashRouter><App /></HashRouter>, document.getElementById("root"))
+ReactDOM.render(<App />, document.getElementById("root"))

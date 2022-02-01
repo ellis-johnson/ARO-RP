@@ -91,7 +91,7 @@ function ClusterDetailCell(
             <Text styles={value.style} variant={'medium'}>{value.value}</Text>
             </Stack.Item>
         }
-    };
+    }
     
 export class OverviewComponent extends Component<OverviewComponentProps, IOverviewComponentState> {
     
@@ -100,8 +100,8 @@ export class OverviewComponent extends Component<OverviewComponentProps, IOvervi
     }
     
     public render() {
-        var headerEntries = Object.entries(clusterDetailHeadings)
-        var filteredHeaders: Array<[string, any]> = []
+        const headerEntries = Object.entries(clusterDetailHeadings)
+        const filteredHeaders: Array<[string, any]> = []
         if (this.props.item.length != 0) {
             headerEntries.filter((element: [string, any]) => {
                 if (this.props.item[element[0]] != null &&
@@ -150,5 +150,5 @@ export class OverviewComponent extends Component<OverviewComponentProps, IOvervi
                 )
             }
         }
-    };
+    }
                                 

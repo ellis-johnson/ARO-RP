@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { AxiosResponse } from 'axios';
 import { FetchMachineSets } from '../Request';
-import { IClusterDetail } from "../App"
+import { ICluster } from "../App"
 import { IMessageBarStyles, MessageBar, MessageBarType, Stack } from '@fluentui/react';
 import { machineSetsKey } from "../ClusterDetail";
 import { MachineSetsComponent } from "./MachineSets";
@@ -17,9 +17,9 @@ export interface IMachineSet {
 }
 
 export function MachineSetsWrapper(props: {
-  currentCluster: IClusterDetail
+  currentCluster: ICluster
   detailPanelSelected: string
-  loaded: string
+  loaded: boolean
 }) {
   const [data, setData] = useState<any>([])
   const [error, setError] = useState<AxiosResponse | null>(null)
@@ -47,7 +47,7 @@ export function MachineSetsWrapper(props: {
   // api/clusterdetail returns a single item.
   const updateData = (newData: any) => {
     setData(newData)
-    let machineSetList: IMachineSet[] = []
+    const machineSetList: IMachineSet[] = []
     if (state && state.current) {
       newData.machines.forEach((element: { name: string;
                                            type: string;
@@ -56,7 +56,7 @@ export function MachineSetsWrapper(props: {
                                            replicas: number;
                                            errorreason: string;
                                            errormessage: string;}) => {
-        let machineSet: IMachineSet = {
+        const machineSet: IMachineSet = {
           name: element.name,
           type: element.type,
           createdAt: element.createdat,
@@ -78,23 +78,23 @@ export function MachineSetsWrapper(props: {
       } else {
         setError(result)
       }
-      setFetching(props.currentCluster.clusterName)
+      setFetching(props.currentCluster.name)
     }
 
     if (props.detailPanelSelected.toLowerCase() == machineSetsKey && 
         fetching === "" &&
-        props.loaded === "DONE" &&
-        props.currentCluster.clusterName != "") {
+        props.loaded &&
+        props.currentCluster.name != "") {
       setFetching("FETCHING")
-      FetchMachineSets(props.currentCluster.subscription, props.currentCluster.resource, props.currentCluster.clusterName).then(onData)
+      FetchMachineSets(props.currentCluster).then(onData)
     }
-  }, [data, props.currentCluster.clusterName, props.loaded, props.detailPanelSelected])
+  }, [data, props.loaded, props.detailPanelSelected])
 
   return (
     <Stack>
       <Stack.Item grow>{error && errorBar()}</Stack.Item>
       <Stack>
-        <MachineSetsComponent machineSets={data!} ref={state} clusterName={props.currentCluster.clusterName}/>
+        <MachineSetsComponent machineSets={data!} ref={state} clusterName={props.currentCluster != null ? props.currentCluster.name : ""}/>
       </Stack>
     </Stack>   
   )

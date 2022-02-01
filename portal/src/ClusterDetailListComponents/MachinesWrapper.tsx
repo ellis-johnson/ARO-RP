@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { AxiosResponse } from 'axios';
 import { FetchMachines } from '../Request';
-import { IClusterDetail } from "../App"
+import { ICluster } from "../App"
 import { MachinesComponent } from './Machines';
 import { IMessageBarStyles, MessageBar, MessageBarType, Stack } from '@fluentui/react';
 import { machinesKey } from "../ClusterDetail";
@@ -18,9 +18,9 @@ export interface IMachine {
 }
 
 export function MachinesWrapper(props: {
-  currentCluster: IClusterDetail
+  currentCluster: ICluster
   detailPanelSelected: string
-  loaded: string
+  loaded: boolean
 }) {
   const [data, setData] = useState<any>([])
   const [error, setError] = useState<AxiosResponse | null>(null)
@@ -48,7 +48,7 @@ export function MachinesWrapper(props: {
   // api/clusterdetail returns a single item.
   const updateData = (newData: any) => {
     setData(newData)
-    let machineList: IMachine[] = []
+    const machineList: IMachine[] = []
     if (state && state.current) {
       newData.machines.forEach((element: { name: string;
                                            createdTime: string;
@@ -58,7 +58,7 @@ export function MachinesWrapper(props: {
                                            lastOperation: string;
                                            lastOperationDate: string;
                                            status: string; }) => {
-        let machine: IMachine = {
+        const machine: IMachine = {
           name: element.name,
           createdTime: element.createdTime,
           lastUpdated: element.lastUpdated,
@@ -81,23 +81,23 @@ export function MachinesWrapper(props: {
       } else {
         setError(result)
       }
-      setFetching(props.currentCluster.clusterName)
+      setFetching(props.currentCluster.name)
     }
 
     if (props.detailPanelSelected.toLowerCase() == machinesKey && 
         fetching === "" &&
-        props.loaded === "DONE" &&
-        props.currentCluster.clusterName != "") {
+        props.loaded &&
+        props.currentCluster.name != "") {
       setFetching("FETCHING")
-      FetchMachines(props.currentCluster.subscription, props.currentCluster.resource, props.currentCluster.clusterName).then(onData) // TODO: fetchClusterInfo accepts IClusterDetail
+      FetchMachines(props.currentCluster).then(onData) // TODO: fetchClusterInfo accepts IClusterDetail
     }
-  }, [data, props.currentCluster.clusterName, props.loaded, props.detailPanelSelected])
+  }, [data, props.loaded, props.detailPanelSelected])
 
   return (
     <Stack>
       <Stack.Item grow>{error && errorBar()}</Stack.Item>
       <Stack>
-        <MachinesComponent machines={data!} ref={state} clusterName={props.currentCluster.clusterName}/>
+        <MachinesComponent machines={data!} ref={state} clusterName={props.currentCluster != null ? props.currentCluster.name : ""}/>
       </Stack>
     </Stack>   
   )

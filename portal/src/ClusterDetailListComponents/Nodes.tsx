@@ -46,7 +46,7 @@ nodes: INode[]
 }
 
 const HeadersFromStringMap = (items: Map<string,string>) => {
-    var newItems: any = {}
+    const newItems: any = {}
     items.forEach((value: string, key: string) => {
         newItems[key] = key
     })
@@ -55,7 +55,7 @@ const HeadersFromStringMap = (items: Map<string,string>) => {
 }
 
 const ObjectFromStringMap = (items: Map<string,string>) => {
-    var newItems: any = {}
+    const newItems: any = {}
     items.forEach((value: string, key: string) => {
         newItems[key] = value
     })
@@ -113,7 +113,7 @@ function PivotOverflowMenuExample(value: any) {
                 {renderNodes(value.nodes)}
             </Pivot>
     );
-};
+}
 export class NodesComponent extends Component<NodesComponentProps, INodesState> {
 
     constructor(props: NodesComponentProps) {

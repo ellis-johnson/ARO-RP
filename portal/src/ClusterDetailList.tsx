@@ -2,19 +2,14 @@ import { Component } from "react"
 import { OverviewWrapper } from './ClusterDetailListComponents/OverviewWrapper';
 import { NodesWrapper } from './ClusterDetailListComponents/NodesWrapper';
 import { MachinesWrapper } from "./ClusterDetailListComponents/MachinesWrapper";
-import { IClusterDetail } from "./App";
 import { MachineSetsWrapper } from "./ClusterDetailListComponents/MachineSetsWrapper";
+import { ICluster } from "./App"
 
 interface ClusterDetailComponentProps {
   item: any
-  clusterInfo: IClusterDetail
-  detailPanelSelected: string
-  loaded: string
-}
-
-interface IClusterDetailComponentState {
-  item: IClusterDetails // why both state and props?
-  detailPanelSelected: string
+  cluster: ICluster | null
+  isDataLoaded: boolean
+  detailPanelVisible: string
 }
 
 export interface IClusterDetails {
@@ -32,10 +27,15 @@ export interface IClusterDetails {
   lastProvisioningState: string
   location: string
   name: string
-  provisioningState: string
   resourceId: string
+  provisioningState: string
   version: string
   installStatus: string
+}
+
+interface IClusterDetailComponentState {
+  item: IClusterDetails // why both state and props?
+  detailPanelSelected: string
 }
 
 export class ClusterDetailComponent extends Component<ClusterDetailComponentProps, IClusterDetailComponentState> {
@@ -45,31 +45,31 @@ export class ClusterDetailComponent extends Component<ClusterDetailComponentProp
   }
 
   public render() {
-    switch (this.props.detailPanelSelected.toLowerCase()) {
+    switch (this.props.detailPanelVisible.toLowerCase()) {
       case "overview":
       {
         return (
-          <OverviewWrapper currentCluster={this.props.clusterInfo} detailPanelSelected={this.props.detailPanelSelected} loaded={this.props.loaded}/>
+          <OverviewWrapper currentCluster={this.props.cluster!} detailPanelSelected={this.props.detailPanelVisible} loaded={this.props.isDataLoaded}/>
         )
       }
       case "nodes":
         {
           return (
-            <NodesWrapper currentCluster={this.props.clusterInfo} detailPanelSelected={this.props.detailPanelSelected} loaded={this.props.loaded}/>
+            <NodesWrapper currentCluster={this.props.cluster!} detailPanelSelected={this.props.detailPanelVisible} loaded={this.props.isDataLoaded}/>
           );
         }
         case "machines":
         {
           return (
-            <MachinesWrapper currentCluster={this.props.clusterInfo} detailPanelSelected={this.props.detailPanelSelected} loaded={this.props.loaded}/>
+            <MachinesWrapper currentCluster={this.props.cluster!} detailPanelSelected={this.props.detailPanelVisible} loaded={this.props.isDataLoaded}/>
           );
         }
         case "machinesets":
         {
           return (
-            <MachineSetsWrapper currentCluster={this.props.clusterInfo} detailPanelSelected={this.props.detailPanelSelected} loaded={this.props.loaded}/>
+            <MachineSetsWrapper currentCluster={this.props.cluster!} detailPanelSelected={this.props.detailPanelVisible} loaded={this.props.isDataLoaded}/>
           );
         }
       }
   }
-};
+}

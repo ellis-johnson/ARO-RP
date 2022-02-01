@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { AxiosResponse } from 'axios';
 import { FetchNodes } from '../Request';
-import { IClusterDetail } from "../App"
+import { ICluster, IClusterDetail } from "../App"
 import { NodesComponent } from './Nodes';
 import { IMessageBarStyles, MessageBar, MessageBarType, Stack } from '@fluentui/react';
 import { nodesKey } from "../ClusterDetail";
@@ -45,9 +45,9 @@ export interface INodeOverviewDetails {
 }
 
 export function NodesWrapper(props: {
-  currentCluster: IClusterDetail
+  currentCluster: ICluster
   detailPanelSelected: string
-  loaded: string
+  loaded: boolean
 }) {
   const [data, setData] = useState<any>([])
   const [error, setError] = useState<AxiosResponse | null>(null)
@@ -75,7 +75,7 @@ export function NodesWrapper(props: {
   // api/clusterdetail returns a single item.
   const updateData = (newData: any) => {
     setData(newData)
-    let nodeList: INode[] = []
+    const nodeList: INode[] = []
     if (state && state.current) {
       newData.nodes.forEach((element: { name: any;
                                         createdTime: any;
@@ -83,10 +83,10 @@ export function NodesWrapper(props: {
                                         allocatable: any;
                                         taints: ITaint[],
                                         conditions: ICondition[],
-                                        labels: object,
-                                        annotations: object,
+                                        labels: Record<string, string>,
+                                        annotations: Record<string, string>,
                                         volumes: IVolume[]}) => {
-        let node: INode = {
+        const node: INode = {
           name: element.name,
           createdTime: element.createdTime,
           capacity: element.capacity,
@@ -125,23 +125,23 @@ export function NodesWrapper(props: {
       } else {
         setError(result)
       }
-      setFetching(props.currentCluster.clusterName)
+      setFetching(props.currentCluster.name)
     }
 
     if (props.detailPanelSelected.toLowerCase() == nodesKey && 
         fetching === "" &&
-        props.loaded === "DONE" &&
-        props.currentCluster.clusterName != "") {
+        props.loaded &&
+        props.currentCluster.name != "") {
       setFetching("FETCHING")
-      FetchNodes(props.currentCluster.subscription, props.currentCluster.resource, props.currentCluster.clusterName).then(onData) // TODO: fetchClusterInfo accepts IClusterDetail
+      FetchNodes(props.currentCluster).then(onData) // TODO: fetchClusterInfo accepts IClusterDetail
     }
-  }, [data, props.currentCluster.clusterName, props.loaded, props.detailPanelSelected])
+  }, [data, props.loaded, props.detailPanelSelected])
 
   return (
     <Stack>
       <Stack.Item grow>{error && errorBar()}</Stack.Item>
       <Stack>
-        <NodesComponent nodes={data!} ref={state} clusterName={props.currentCluster.clusterName}/>
+        <NodesComponent nodes={data!} ref={state} clusterName={props.currentCluster != null ? props.currentCluster.name : ""}/>
       </Stack>
     </Stack>   
   )

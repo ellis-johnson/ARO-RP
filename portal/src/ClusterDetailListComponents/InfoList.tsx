@@ -58,14 +58,14 @@ function Column(
                       <Text styles={value.style} variant={'medium'}>{value.value}</Text>
                    </Stack.Item>
         }
-    };
+    }
 
 
 export const InfoList = (
     props: {headers: any, object: any, title: string, titleSize: any}
 ) => {
-    var headerEntries = Object.entries(props.headers)
-    var filteredHeaders: Array<[string, any]> = []
+    const headerEntries = Object.entries(props.headers)
+    const filteredHeaders: Array<[string, any]> = []
     headerEntries.filter((element: [string, any]) => {
         if (props.object[element[0]] != null &&
             props.object[element[0]].toString().length > 0) {
