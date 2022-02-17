@@ -10,6 +10,7 @@ import (
 	"github.com/openshift/installer/pkg/asset/templates/content/bootkube"
 	azuretypes "github.com/openshift/installer/pkg/types/azure"
 	baremetaltypes "github.com/openshift/installer/pkg/types/baremetal"
+	kubevirttypes "github.com/openshift/installer/pkg/types/kubevirt"
 	openstacktypes "github.com/openshift/installer/pkg/types/openstack"
 	ovirttypes "github.com/openshift/installer/pkg/types/ovirt"
 	vspheretypes "github.com/openshift/installer/pkg/types/vsphere"
@@ -50,7 +51,7 @@ func (a *MCSCertKey) Generate(dependencies asset.Parents) error {
 
 	switch installConfig.Config.Platform.Name() {
 	case azuretypes.Name:
-		if installConfig.Config.Azure.IsARO() {
+		if installConfig.Config.Azure.ARO {
 			cfg.IPAddresses = []net.IP{net.ParseIP(aroDNSConfig.APIIntIP)}
 			cfg.DNSNames = []string{hostname, aroDNSConfig.APIIntIP}
 		} else {
@@ -71,6 +72,9 @@ func (a *MCSCertKey) Generate(dependencies asset.Parents) error {
 			cfg.IPAddresses = []net.IP{net.ParseIP(installConfig.Config.VSphere.APIVIP)}
 			cfg.DNSNames = append(cfg.DNSNames, installConfig.Config.VSphere.APIVIP)
 		}
+	case kubevirttypes.Name:
+		cfg.IPAddresses = []net.IP{net.ParseIP(installConfig.Config.Kubevirt.APIVIP)}
+		cfg.DNSNames = []string{hostname, installConfig.Config.Kubevirt.APIVIP}
 	default:
 		cfg.DNSNames = []string{hostname}
 	}

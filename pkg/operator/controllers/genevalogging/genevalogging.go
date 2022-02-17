@@ -41,9 +41,6 @@ func (r *Reconciler) daemonset(cluster *arov1alpha1.Cluster) (*appsv1.DaemonSet,
 		return nil, err
 	}
 
-	fluentbitPullspec := cluster.Spec.OperatorFlags.GetWithDefault(FLUENTBIT_PULLSPEC, version.FluentbitImage(cluster.Spec.ACRDomain))
-	mdsdPullspec := cluster.Spec.OperatorFlags.GetWithDefault(MDSD_PULLSPEC, version.MdsdImage(cluster.Spec.ACRDomain))
-
 	return &appsv1.DaemonSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "mdsd",
@@ -118,7 +115,7 @@ func (r *Reconciler) daemonset(cluster *arov1alpha1.Cluster) (*appsv1.DaemonSet,
 					Containers: []corev1.Container{
 						{
 							Name:  "fluentbit",
-							Image: fluentbitPullspec,
+							Image: version.FluentbitImage(cluster.Spec.ACRDomain),
 							Command: []string{
 								"/opt/td-agent-bit/bin/td-agent-bit",
 							},
@@ -155,7 +152,7 @@ func (r *Reconciler) daemonset(cluster *arov1alpha1.Cluster) (*appsv1.DaemonSet,
 						},
 						{
 							Name:  "mdsd",
-							Image: mdsdPullspec,
+							Image: version.MdsdImage(cluster.Spec.ACRDomain),
 							Command: []string{
 								"/usr/sbin/mdsd",
 							},

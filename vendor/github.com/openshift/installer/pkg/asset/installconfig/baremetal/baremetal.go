@@ -3,7 +3,6 @@ package baremetal
 
 import (
 	"fmt"
-
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/pkg/errors"
@@ -63,6 +62,7 @@ func Platform() (*baremetal.Platform, error) {
 					Message: "Provisioning Network Interface",
 					Help:    "The name of the network interface on a control plane host connected to the provisioning network.",
 				},
+				Validate: survey.Required,
 			},
 		}, &provisioningNetworkInterface); err != nil {
 			return nil, err

@@ -21,5 +21,4 @@ const (
 	NodeControllerName                     = "Node"
 	MachineControllerName                  = "Machine"
 	MachineSetControllerName               = "MachineSet"
-	ImageConfigControllerName              = "ImageConfig"
 )

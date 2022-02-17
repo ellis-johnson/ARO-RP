@@ -52,8 +52,9 @@ type PreviewFeatureSpec struct {
 
 // PreviewFeatureStatus defines the observed state of PreviewFeature
 type PreviewFeatureStatus struct {
-	OperatorVersion string                         `json:"operatorVersion,omitempty"`
-	Conditions      []operatorv1.OperatorCondition `json:"conditions,omitempty"`
+	OperatorVersion   string                         `json:"operatorVersion,omitempty"`
+	Conditions        []operatorv1.OperatorCondition `json:"conditions,omitempty"`
+	RedHatKeysPresent []string                       `json:"redHatKeysPresent,omitempty"`
 }
 
 // PreviewFeature is the Schema for the preview feature API

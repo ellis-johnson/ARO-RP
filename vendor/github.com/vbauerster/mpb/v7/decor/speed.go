@@ -2,6 +2,7 @@ package decor
 
 import (
 	"fmt"
+	"io"
 	"math"
 	"time"
 
@@ -23,7 +24,7 @@ type speedFormatter struct {
 
 func (self *speedFormatter) Format(st fmt.State, verb rune) {
 	self.Formatter.Format(st, verb)
-	optimisticStringWriter(st)("/s")
+	io.WriteString(st, "/s")
 }
 
 // EwmaSpeed exponential-weighted-moving-average based speed decorator.

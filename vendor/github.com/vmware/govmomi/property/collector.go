@@ -97,16 +97,10 @@ func (p *Collector) CreateFilter(ctx context.Context, req types.CreateFilter) er
 	return nil
 }
 
-func (p *Collector) WaitForUpdates(ctx context.Context, version string, opts ...*types.WaitOptions) (*types.UpdateSet, error) {
+func (p *Collector) WaitForUpdates(ctx context.Context, v string) (*types.UpdateSet, error) {
 	req := types.WaitForUpdatesEx{
 		This:    p.Reference(),
-		Version: version,
-	}
-
-	if len(opts) == 1 {
-		req.Options = opts[0]
-	} else if len(opts) > 1 {
-		panic("only one option may be specified")
+		Version: v,
 	}
 
 	res, err := methods.WaitForUpdatesEx(ctx, p.roundTripper, &req)

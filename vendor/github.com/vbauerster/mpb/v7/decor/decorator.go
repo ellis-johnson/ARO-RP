@@ -53,7 +53,6 @@ type Statistics struct {
 	Current        int64
 	Refill         int64
 	Completed      bool
-	Aborted        bool
 }
 
 // Decorator interface.

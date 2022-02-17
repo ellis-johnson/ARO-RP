@@ -14,13 +14,7 @@ import (
 	"time"
 
 	"github.com/containers/storage/pkg/homedir"
-	// This is a fallback code; the primary recommendation is to use the gpgme mechanism
-	// implementation, which is out-of-process and more appropriate for handling long-term private key material
-	// than any Go implementation.
-	// For this verify-only fallback, we haven't reviewed any of the
-	// existing alternatives to choose; so, for now, continue to
-	// use this frozen deprecated implementation.
-	"golang.org/x/crypto/openpgp" //nolint:staticcheck
+	"golang.org/x/crypto/openpgp"
 )
 
 // A GPG/OpenPGP signing mechanism, implemented using x/crypto/openpgp.

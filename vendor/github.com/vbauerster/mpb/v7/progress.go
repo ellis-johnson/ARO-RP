@@ -6,6 +6,8 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"log"
 	"math"
 	"os"
 	"sync"
@@ -31,6 +33,7 @@ type Progress struct {
 	done         chan struct{}
 	refreshCh    chan time.Time
 	once         sync.Once
+	dlogger      *log.Logger
 }
 
 // pState holds bars in its priorityQueue. It gets passed to
@@ -72,6 +75,7 @@ func NewWithContext(ctx context.Context, options ...ContainerOption) *Progress {
 		rr:         prr,
 		parkedBars: make(map[*Bar]*Bar),
 		output:     os.Stdout,
+		debugOut:   ioutil.Discard,
 	}
 
 	for _, opt := range options {
@@ -87,6 +91,7 @@ func NewWithContext(ctx context.Context, options ...ContainerOption) *Progress {
 		bwg:          new(sync.WaitGroup),
 		operateState: make(chan func(*pState)),
 		done:         make(chan struct{}),
+		dlogger:      log.New(s.debugOut, "[mpb] ", log.Lshortfile),
 	}
 
 	p.cwg.Add(1)
@@ -94,19 +99,17 @@ func NewWithContext(ctx context.Context, options ...ContainerOption) *Progress {
 	return p
 }
 
-// AddBar creates a bar with default bar filler.
+// AddBar creates a bar with default bar filler. Different filler can
+// be chosen and applied via `*Progress.Add(...) *Bar` method.
 func (p *Progress) AddBar(total int64, options ...BarOption) *Bar {
-	return p.New(total, BarStyle(), options...)
+	return p.Add(total, NewBarFiller(BarStyle()), options...)
 }
 
-// AddSpinner creates a bar with default spinner filler.
+// AddSpinner creates a bar with default spinner filler. Different
+// filler can be chosen and applied via `*Progress.Add(...) *Bar`
+// method.
 func (p *Progress) AddSpinner(total int64, options ...BarOption) *Bar {
-	return p.New(total, SpinnerStyle(), options...)
-}
-
-// New creates a bar with provided BarFillerBuilder.
-func (p *Progress) New(total int64, builder BarFillerBuilder, options ...BarOption) *Bar {
-	return p.Add(total, builder.Build(), options...)
+	return p.Add(total, NewBarFiller(SpinnerStyle()), options...)
 }
 
 // Add creates a bar which renders itself by provided filler.
@@ -114,7 +117,7 @@ func (p *Progress) New(total int64, builder BarFillerBuilder, options ...BarOpti
 // Panics if *Progress instance is done, i.e. called after *Progress.Wait().
 func (p *Progress) Add(total int64, filler BarFiller, options ...BarOption) *Bar {
 	if filler == nil {
-		filler = NopStyle().Build()
+		filler = BarFillerFunc(func(io.Writer, int, decor.Statistics) {})
 	}
 	p.bwg.Add(1)
 	result := make(chan *Bar)
@@ -229,26 +232,12 @@ func (p *Progress) serve(s *pState, cw *cwriter.Writer) {
 			op(s)
 		case <-p.refreshCh:
 			if err := s.render(cw); err != nil {
-				if s.debugOut != nil {
-					_, e := fmt.Fprintln(s.debugOut, err)
-					if e != nil {
-						panic(err)
-					}
-				} else {
-					panic(err)
-				}
+				p.dlogger.Println(err)
 			}
 		case <-s.shutdownNotifier:
 			for s.heapUpdated {
 				if err := s.render(cw); err != nil {
-					if s.debugOut != nil {
-						_, e := fmt.Fprintln(s.debugOut, err)
-						if e != nil {
-							panic(err)
-						}
-					} else {
-						panic(err)
-					}
+					p.dlogger.Println(err)
 				}
 			}
 			return
@@ -320,10 +309,7 @@ func (s *pState) flush(cw *cwriter.Writer) error {
 	for s.bHeap.Len() > 0 {
 		b := heap.Pop(&s.bHeap).(*Bar)
 		frame := <-b.frameCh
-		_, err := cw.ReadFrom(frame.reader)
-		if err != nil {
-			return err
-		}
+		cw.ReadFrom(frame.reader)
 		if b.toShutdown {
 			if b.recoveredPanic != nil {
 				s.barShutdownQueue = append(s.barShutdownQueue, b)
@@ -414,9 +400,9 @@ func (s *pState) makeBarState(total int64, filler BarFiller, options ...BarOptio
 		bs.priority = -(math.MaxInt32 - s.idCount)
 	}
 
-	for i := 0; i < len(bs.buffers); i++ {
-		bs.buffers[i] = bytes.NewBuffer(make([]byte, 0, 512))
-	}
+	bs.bufP = bytes.NewBuffer(make([]byte, 0, 128))
+	bs.bufB = bytes.NewBuffer(make([]byte, 0, 256))
+	bs.bufA = bytes.NewBuffer(make([]byte, 0, 128))
 
 	return bs
 }

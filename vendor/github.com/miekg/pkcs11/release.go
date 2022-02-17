@@ -1,4 +1,3 @@
-//go:build release
 // +build release
 
 package pkcs11
@@ -6,7 +5,7 @@ package pkcs11
 import "fmt"
 
 // Release is current version of the pkcs11 library.
-var Release = R{1, 1, 1}
+var Release = R{1, 0, 3}
 
 // R holds the version of this library.
 type R struct {

@@ -16,7 +16,6 @@ import (
 )
 
 func TestMerge(t *testing.T) {
-	serviceInternalTrafficPolicy := corev1.ServiceInternalTrafficPolicyCluster
 	for _, tt := range []struct {
 		name          string
 		old           kruntime.Object
@@ -167,19 +166,17 @@ func TestMerge(t *testing.T) {
 			name: "Service no changes",
 			old: &corev1.Service{
 				Spec: corev1.ServiceSpec{
-					ClusterIP:             "1.2.3.4",
-					Type:                  corev1.ServiceTypeClusterIP,
-					SessionAffinity:       corev1.ServiceAffinityNone,
-					InternalTrafficPolicy: &serviceInternalTrafficPolicy,
+					ClusterIP:       "1.2.3.4",
+					Type:            corev1.ServiceTypeClusterIP,
+					SessionAffinity: corev1.ServiceAffinityNone,
 				},
 			},
 			new: &corev1.Service{},
 			want: &corev1.Service{
 				Spec: corev1.ServiceSpec{
-					ClusterIP:             "1.2.3.4",
-					Type:                  corev1.ServiceTypeClusterIP,
-					SessionAffinity:       corev1.ServiceAffinityNone,
-					InternalTrafficPolicy: &serviceInternalTrafficPolicy,
+					ClusterIP:       "1.2.3.4",
+					Type:            corev1.ServiceTypeClusterIP,
+					SessionAffinity: corev1.ServiceAffinityNone,
 				},
 			},
 			wantEmptyDiff: true,

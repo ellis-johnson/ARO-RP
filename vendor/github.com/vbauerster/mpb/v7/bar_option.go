@@ -5,19 +5,11 @@ import (
 	"io"
 
 	"github.com/vbauerster/mpb/v7/decor"
+	"github.com/vbauerster/mpb/v7/internal"
 )
 
 // BarOption is a func option to alter default behavior of a bar.
 type BarOption func(*bState)
-
-func skipNil(decorators []decor.Decorator) (filtered []decor.Decorator) {
-	for _, d := range decorators {
-		if d != nil {
-			filtered = append(filtered, d)
-		}
-	}
-	return
-}
 
 func (s *bState) addDecorators(dest *[]decor.Decorator, decorators ...decor.Decorator) {
 	type mergeWrapper interface {
@@ -34,14 +26,14 @@ func (s *bState) addDecorators(dest *[]decor.Decorator, decorators ...decor.Deco
 // AppendDecorators let you inject decorators to the bar's right side.
 func AppendDecorators(decorators ...decor.Decorator) BarOption {
 	return func(s *bState) {
-		s.addDecorators(&s.aDecorators, skipNil(decorators)...)
+		s.addDecorators(&s.aDecorators, decorators...)
 	}
 }
 
 // PrependDecorators let you inject decorators to the bar's left side.
 func PrependDecorators(decorators ...decor.Decorator) BarOption {
 	return func(s *bState) {
-		s.addDecorators(&s.pDecorators, skipNil(decorators)...)
+		s.addDecorators(&s.pDecorators, decorators...)
 	}
 }
 
@@ -89,10 +81,7 @@ func BarFillerOnComplete(message string) BarOption {
 	return BarFillerMiddleware(func(base BarFiller) BarFiller {
 		return BarFillerFunc(func(w io.Writer, reqWidth int, st decor.Statistics) {
 			if st.Completed {
-				_, err := io.WriteString(w, message)
-				if err != nil {
-					panic(err)
-				}
+				io.WriteString(w, message)
 			} else {
 				base.Fill(w, reqWidth, st)
 			}
@@ -149,12 +138,9 @@ func BarNoPop() BarOption {
 	}
 }
 
-// BarOptional will invoke provided option only when cond is true.
-func BarOptional(option BarOption, cond bool) BarOption {
-	if cond {
-		return option
-	}
-	return nil
+// BarOptional will invoke provided option only when pick is true.
+func BarOptional(option BarOption, pick bool) BarOption {
+	return BarOptOn(option, internal.Predicate(pick))
 }
 
 // BarOptOn will invoke provided option only when higher order predicate

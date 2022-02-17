@@ -256,8 +256,3 @@ func (t *typeInfo) LoadFromObjectContent(o types.ObjectContent) (reflect.Value, 
 
 	return v, nil
 }
-
-func IsManagedObjectType(kind string) bool {
-	_, ok := t[kind]
-	return ok
-}

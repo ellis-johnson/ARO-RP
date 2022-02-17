@@ -42,48 +42,31 @@ type Credentials struct {
 
 // GetSession returns an azure session by using credentials found in ~/.azure/osServicePrincipal.json
 // and, if no creds are found, asks for them and stores them on disk in a config file
-func GetSession(cloudName azure.CloudEnvironment, armEndpoint string) (*Session, error) {
-	return GetSessionWithCredentials(cloudName, armEndpoint, nil)
-}
-
-// GetSessionWithCredentials returns an Azure session by using prepopulated credentials.
-// If there are no prepopulated credentials it falls back to reading credentials from file system
-// or from user input.
-func GetSessionWithCredentials(cloudName azure.CloudEnvironment, armEndpoint string, credentials *Credentials) (*Session, error) {
-	var cloudEnv azureenv.Environment
-	var err error
-	switch cloudName {
-	case azure.StackCloud:
-		cloudEnv, err = azureenv.EnvironmentFromURL(armEndpoint)
-	default:
-		cloudEnv, err = azureenv.EnvironmentFromName(string(cloudName))
-	}
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get Azure environment for the %q cloud", cloudName)
-	}
-
-	if credentials == nil {
-		credentials, err = credentialsFromFileOrUser(&cloudEnv)
+func GetSession(cloudName azure.CloudEnvironment, credentials *Credentials) (*Session, error) {
+	if credentials != nil {
+		env, err := azureenv.EnvironmentFromName(string(cloudName))
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "failed to get Azure environment for the %q cloud", cloudName)
 		}
+		return newSessionFromCredentials(env, credentials)
 	}
 
-	return newSessionFromCredentials(cloudEnv, credentials)
+	authFile := defaultAuthFilePath
+	if f := os.Getenv(azureAuthEnv); len(f) > 0 {
+		authFile = f
+	}
+	return newSessionFromFile(authFile, cloudName)
 }
 
-// credentialsFromFileOrUser returns credentials found
-// in ~/.azure/osServicePrincipal.json and, if no creds are found,
-// asks for them and stores them on disk in a config file
-func credentialsFromFileOrUser(cloudEnv *azureenv.Environment) (*Credentials, error) {
-	authFilePath := defaultAuthFilePath
-	if f := os.Getenv(azureAuthEnv); len(f) > 0 {
-		authFilePath = f
-	}
+func newSessionFromFile(authFilePath string, cloudName azure.CloudEnvironment) (*Session, error) {
 	// NewAuthorizerFromFileWithResource uses `auth.GetSettingsFromFile`, which uses the `azureAuthEnv` to fetch the auth credentials.
 	// therefore setting the local env here to authFilePath allows NewAuthorizerFromFileWithResource to load credentials.
 	os.Setenv(azureAuthEnv, authFilePath)
-	_, err := auth.NewAuthorizerFromFileWithResource(cloudEnv.ResourceManagerEndpoint)
+	env, err := azureenv.EnvironmentFromName(string(cloudName))
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to get Azure environment for the %q cloud", cloudName)
+	}
+	_, err = auth.NewAuthorizerFromFileWithResource(env.ResourceManagerEndpoint)
 	if err != nil {
 		logrus.Debug("Could not get an azure authorizer from file. Asking user to provide authentication info")
 		credentials, err := askForCredentials()
@@ -102,6 +85,8 @@ func credentialsFromFileOrUser(cloudEnv *azureenv.Environment) (*Credentials, er
 		return nil, errors.Wrap(err, "failed to get settings from file")
 	}
 
+	authSettings.Values[auth.ActiveDirectoryEndpoint] = env.ActiveDirectoryEndpoint
+
 	credentials, err := getCredentials(authSettings)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to map authsettings to credentials")
@@ -114,7 +99,42 @@ func credentialsFromFileOrUser(cloudEnv *azureenv.Environment) (*Credentials, er
 		logrus.Infof("Credentials loaded from file %q", authFilePath)
 	})
 
-	return credentials, nil
+	return newSessionFromCredentials(env, credentials)
+}
+
+func newSessionFromCredentials(env azureenv.Environment, credentials *Credentials) (*Session, error) {
+	c := &auth.ClientCredentialsConfig{
+		TenantID:     credentials.TenantID,
+		ClientID:     credentials.ClientID,
+		ClientSecret: credentials.ClientSecret,
+		AADEndpoint:  env.ActiveDirectoryEndpoint,
+		Resource:     env.ResourceManagerEndpoint,
+	}
+
+	authorizer, err := c.Authorizer()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get client credentials authorizer from saved azure auth settings")
+	}
+
+	c = &auth.ClientCredentialsConfig{
+		TenantID:     credentials.TenantID,
+		ClientID:     credentials.ClientID,
+		ClientSecret: credentials.ClientSecret,
+		AADEndpoint:  env.ActiveDirectoryEndpoint,
+		Resource:     env.GraphEndpoint,
+	}
+
+	graphAuthorizer, err := c.Authorizer()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get GraphEndpoint authorizer from saved azure auth settings")
+	}
+
+	return &Session{
+		GraphAuthorizer: graphAuthorizer,
+		Authorizer:      authorizer,
+		Credentials:     *credentials,
+		Environment:     env,
+	}, nil
 }
 
 func getCredentials(fs auth.FileSettings) (*Credentials, error) {
@@ -214,30 +234,4 @@ func saveCredentials(credentials Credentials, filePath string) error {
 	}
 
 	return ioutil.WriteFile(filePath, jsonCreds, 0600)
-}
-
-func newSessionFromCredentials(cloudEnv azureenv.Environment, credentials *Credentials) (*Session, error) {
-	c := &auth.ClientCredentialsConfig{
-		TenantID:     credentials.TenantID,
-		ClientID:     credentials.ClientID,
-		ClientSecret: credentials.ClientSecret,
-		AADEndpoint:  cloudEnv.ActiveDirectoryEndpoint,
-	}
-	c.Resource = cloudEnv.TokenAudience
-	authorizer, err := c.Authorizer()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get client credentials authorizer")
-	}
-
-	c.Resource = cloudEnv.GraphEndpoint
-	graphAuthorizer, err := c.Authorizer()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get GraphEndpoint authorizer")
-	}
-	return &Session{
-		GraphAuthorizer: graphAuthorizer,
-		Authorizer:      authorizer,
-		Credentials:     *credentials,
-		Environment:     cloudEnv,
-	}, nil
 }

@@ -73,19 +73,15 @@ func (s *sFiller) Fill(w io.Writer, width int, stat decor.Statistics) {
 		return
 	}
 
-	var err error
 	rest := width - frameWidth
 	switch s.position {
 	case positionLeft:
-		_, err = io.WriteString(w, frame+strings.Repeat(" ", rest))
+		io.WriteString(w, frame+strings.Repeat(" ", rest))
 	case positionRight:
-		_, err = io.WriteString(w, strings.Repeat(" ", rest)+frame)
+		io.WriteString(w, strings.Repeat(" ", rest)+frame)
 	default:
 		str := strings.Repeat(" ", rest/2) + frame + strings.Repeat(" ", rest/2+rest%2)
-		_, err = io.WriteString(w, str)
-	}
-	if err != nil {
-		panic(err)
+		io.WriteString(w, str)
 	}
 	s.count++
 }

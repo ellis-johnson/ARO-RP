@@ -16,13 +16,12 @@ import (
 	"github.com/openshift/installer/pkg/asset/installconfig"
 	icaws "github.com/openshift/installer/pkg/asset/installconfig/aws"
 	icgcp "github.com/openshift/installer/pkg/asset/installconfig/gcp"
-	icibmcloud "github.com/openshift/installer/pkg/asset/installconfig/ibmcloud"
 	"github.com/openshift/installer/pkg/types"
 	awstypes "github.com/openshift/installer/pkg/types/aws"
 	azuretypes "github.com/openshift/installer/pkg/types/azure"
 	baremetaltypes "github.com/openshift/installer/pkg/types/baremetal"
 	gcptypes "github.com/openshift/installer/pkg/types/gcp"
-	ibmcloudtypes "github.com/openshift/installer/pkg/types/ibmcloud"
+	kubevirttypes "github.com/openshift/installer/pkg/types/kubevirt"
 	libvirttypes "github.com/openshift/installer/pkg/types/libvirt"
 	nonetypes "github.com/openshift/installer/pkg/types/none"
 	openstacktypes "github.com/openshift/installer/pkg/types/openstack"
@@ -106,17 +105,15 @@ func (d *DNS) Generate(dependencies asset.Parents) error {
 			return err
 		}
 
-		if !installConfig.Config.Azure.IsARO() {
+		if !installConfig.Config.Azure.ARO {
 			if installConfig.Config.Publish == types.ExternalPublishingStrategy {
 				//currently, this guesses the azure resource IDs from known parameter.
 				config.Spec.PublicZone = &configv1.DNSZone{
 					ID: dnsConfig.GetDNSZoneID(installConfig.Config.Azure.BaseDomainResourceGroupName, installConfig.Config.BaseDomain),
 				}
 			}
-			if installConfig.Azure.CloudName != azuretypes.StackCloud {
-				config.Spec.PrivateZone = &configv1.DNSZone{
-					ID: dnsConfig.GetPrivateDNSZoneID(installConfig.Config.Azure.ClusterResourceGroupName(clusterID.InfraID), installConfig.Config.ClusterDomain()),
-				}
+			config.Spec.PrivateZone = &configv1.DNSZone{
+				ID: dnsConfig.GetPrivateDNSZoneID(installConfig.Config.Azure.ClusterResourceGroupName(clusterID.InfraID), installConfig.Config.ClusterDomain()),
 			}
 		}
 	case gcptypes.Name:
@@ -128,26 +125,7 @@ func (d *DNS) Generate(dependencies asset.Parents) error {
 			config.Spec.PublicZone = &configv1.DNSZone{ID: zone.Name}
 		}
 		config.Spec.PrivateZone = &configv1.DNSZone{ID: fmt.Sprintf("%s-private-zone", clusterID.InfraID)}
-	case ibmcloudtypes.Name:
-		client, err := icibmcloud.NewClient()
-		if err != nil {
-			return errors.Wrap(err, "failed to get IBM Cloud client")
-		}
-
-		zoneID, err := client.GetDNSZoneIDByName(context.TODO(), installConfig.Config.BaseDomain)
-		if err != nil {
-			return errors.Wrap(err, "failed ot get DNS zone ID")
-		}
-
-		if installConfig.Config.Publish == types.ExternalPublishingStrategy {
-			config.Spec.PublicZone = &configv1.DNSZone{
-				ID: zoneID,
-			}
-		}
-		config.Spec.PrivateZone = &configv1.DNSZone{
-			ID: zoneID,
-		}
-	case libvirttypes.Name, openstacktypes.Name, baremetaltypes.Name, nonetypes.Name, vspheretypes.Name, ovirttypes.Name:
+	case libvirttypes.Name, openstacktypes.Name, baremetaltypes.Name, nonetypes.Name, vspheretypes.Name, ovirttypes.Name, kubevirttypes.Name:
 	default:
 		return errors.New("invalid Platform")
 	}

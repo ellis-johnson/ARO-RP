@@ -54,10 +54,6 @@ func OCI1FromManifest(manifest []byte) (*OCI1, error) {
 	if err := json.Unmarshal(manifest, &oci1); err != nil {
 		return nil, err
 	}
-	if err := validateUnambiguousManifestFormat(manifest, imgspecv1.MediaTypeImageIndex,
-		allowedFieldConfig|allowedFieldLayers); err != nil {
-		return nil, err
-	}
 	return &oci1, nil
 }
 
@@ -66,7 +62,6 @@ func OCI1FromComponents(config imgspecv1.Descriptor, layers []imgspecv1.Descript
 	return &OCI1{
 		imgspecv1.Manifest{
 			Versioned: specs.Versioned{SchemaVersion: 2},
-			MediaType: imgspecv1.MediaTypeImageManifest,
 			Config:    config,
 			Layers:    layers,
 		},

@@ -75,7 +75,7 @@ func (client TableResourcesClient) CreateUpdateTable(ctx context.Context, resour
 
 	result, err = client.CreateUpdateTableSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "documentdb.TableResourcesClient", "CreateUpdateTable", result.Response(), "Failure sending request")
+		err = autorest.NewErrorWithError(err, "documentdb.TableResourcesClient", "CreateUpdateTable", nil, "Failure sending request")
 		return
 	}
 
@@ -110,7 +110,6 @@ func (client TableResourcesClient) CreateUpdateTablePreparer(ctx context.Context
 // http.Response Body if it receives an error.
 func (client TableResourcesClient) CreateUpdateTableSender(req *http.Request) (future TableResourcesCreateUpdateTableFuture, err error) {
 	var resp *http.Response
-	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
@@ -172,7 +171,7 @@ func (client TableResourcesClient) DeleteTable(ctx context.Context, resourceGrou
 
 	result, err = client.DeleteTableSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "documentdb.TableResourcesClient", "DeleteTable", result.Response(), "Failure sending request")
+		err = autorest.NewErrorWithError(err, "documentdb.TableResourcesClient", "DeleteTable", nil, "Failure sending request")
 		return
 	}
 
@@ -205,7 +204,6 @@ func (client TableResourcesClient) DeleteTablePreparer(ctx context.Context, reso
 // http.Response Body if it receives an error.
 func (client TableResourcesClient) DeleteTableSender(req *http.Request) (future TableResourcesDeleteTableFuture, err error) {
 	var resp *http.Response
-	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
@@ -541,7 +539,7 @@ func (client TableResourcesClient) MigrateTableToAutoscale(ctx context.Context, 
 
 	result, err = client.MigrateTableToAutoscaleSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "documentdb.TableResourcesClient", "MigrateTableToAutoscale", result.Response(), "Failure sending request")
+		err = autorest.NewErrorWithError(err, "documentdb.TableResourcesClient", "MigrateTableToAutoscale", nil, "Failure sending request")
 		return
 	}
 
@@ -574,7 +572,6 @@ func (client TableResourcesClient) MigrateTableToAutoscalePreparer(ctx context.C
 // http.Response Body if it receives an error.
 func (client TableResourcesClient) MigrateTableToAutoscaleSender(req *http.Request) (future TableResourcesMigrateTableToAutoscaleFuture, err error) {
 	var resp *http.Response
-	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
@@ -636,7 +633,7 @@ func (client TableResourcesClient) MigrateTableToManualThroughput(ctx context.Co
 
 	result, err = client.MigrateTableToManualThroughputSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "documentdb.TableResourcesClient", "MigrateTableToManualThroughput", result.Response(), "Failure sending request")
+		err = autorest.NewErrorWithError(err, "documentdb.TableResourcesClient", "MigrateTableToManualThroughput", nil, "Failure sending request")
 		return
 	}
 
@@ -669,7 +666,6 @@ func (client TableResourcesClient) MigrateTableToManualThroughputPreparer(ctx co
 // http.Response Body if it receives an error.
 func (client TableResourcesClient) MigrateTableToManualThroughputSender(req *http.Request) (future TableResourcesMigrateTableToManualThroughputFuture, err error) {
 	var resp *http.Response
-	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
@@ -739,7 +735,7 @@ func (client TableResourcesClient) UpdateTableThroughput(ctx context.Context, re
 
 	result, err = client.UpdateTableThroughputSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "documentdb.TableResourcesClient", "UpdateTableThroughput", result.Response(), "Failure sending request")
+		err = autorest.NewErrorWithError(err, "documentdb.TableResourcesClient", "UpdateTableThroughput", nil, "Failure sending request")
 		return
 	}
 
@@ -774,7 +770,6 @@ func (client TableResourcesClient) UpdateTableThroughputPreparer(ctx context.Con
 // http.Response Body if it receives an error.
 func (client TableResourcesClient) UpdateTableThroughputSender(req *http.Request) (future TableResourcesUpdateTableThroughputFuture, err error) {
 	var resp *http.Response
-	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return

@@ -78,7 +78,7 @@ func (client DisksClient) CreateOrUpdate(ctx context.Context, resourceGroupName 
 
 	result, err = client.CreateOrUpdateSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "compute.DisksClient", "CreateOrUpdate", result.Response(), "Failure sending request")
+		err = autorest.NewErrorWithError(err, "compute.DisksClient", "CreateOrUpdate", nil, "Failure sending request")
 		return
 	}
 
@@ -113,7 +113,6 @@ func (client DisksClient) CreateOrUpdatePreparer(ctx context.Context, resourceGr
 // http.Response Body if it receives an error.
 func (client DisksClient) CreateOrUpdateSender(req *http.Request) (future DisksCreateOrUpdateFuture, err error) {
 	var resp *http.Response
-	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
@@ -162,7 +161,7 @@ func (client DisksClient) Delete(ctx context.Context, resourceGroupName string, 
 
 	result, err = client.DeleteSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "compute.DisksClient", "Delete", result.Response(), "Failure sending request")
+		err = autorest.NewErrorWithError(err, "compute.DisksClient", "Delete", nil, "Failure sending request")
 		return
 	}
 
@@ -194,7 +193,6 @@ func (client DisksClient) DeletePreparer(ctx context.Context, resourceGroupName 
 // http.Response Body if it receives an error.
 func (client DisksClient) DeleteSender(req *http.Request) (future DisksDeleteFuture, err error) {
 	var resp *http.Response
-	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
@@ -327,7 +325,7 @@ func (client DisksClient) GrantAccess(ctx context.Context, resourceGroupName str
 
 	result, err = client.GrantAccessSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "compute.DisksClient", "GrantAccess", result.Response(), "Failure sending request")
+		err = autorest.NewErrorWithError(err, "compute.DisksClient", "GrantAccess", nil, "Failure sending request")
 		return
 	}
 
@@ -361,7 +359,6 @@ func (client DisksClient) GrantAccessPreparer(ctx context.Context, resourceGroup
 // http.Response Body if it receives an error.
 func (client DisksClient) GrantAccessSender(req *http.Request) (future DisksGrantAccessFuture, err error) {
 	var resp *http.Response
-	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
@@ -639,7 +636,7 @@ func (client DisksClient) RevokeAccess(ctx context.Context, resourceGroupName st
 
 	result, err = client.RevokeAccessSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "compute.DisksClient", "RevokeAccess", result.Response(), "Failure sending request")
+		err = autorest.NewErrorWithError(err, "compute.DisksClient", "RevokeAccess", nil, "Failure sending request")
 		return
 	}
 
@@ -671,7 +668,6 @@ func (client DisksClient) RevokeAccessPreparer(ctx context.Context, resourceGrou
 // http.Response Body if it receives an error.
 func (client DisksClient) RevokeAccessSender(req *http.Request) (future DisksRevokeAccessFuture, err error) {
 	var resp *http.Response
-	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
@@ -720,7 +716,7 @@ func (client DisksClient) Update(ctx context.Context, resourceGroupName string, 
 
 	result, err = client.UpdateSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "compute.DisksClient", "Update", result.Response(), "Failure sending request")
+		err = autorest.NewErrorWithError(err, "compute.DisksClient", "Update", nil, "Failure sending request")
 		return
 	}
 
@@ -754,7 +750,6 @@ func (client DisksClient) UpdatePreparer(ctx context.Context, resourceGroupName 
 // http.Response Body if it receives an error.
 func (client DisksClient) UpdateSender(req *http.Request) (future DisksUpdateFuture, err error) {
 	var resp *http.Response
-	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return

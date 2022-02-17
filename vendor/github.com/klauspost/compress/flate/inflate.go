@@ -328,17 +328,11 @@ func (f *decompressor) nextBlock() {
 	switch typ {
 	case 0:
 		f.dataBlock()
-		if debugDecode {
-			fmt.Println("stored block")
-		}
 	case 1:
 		// compressed, fixed Huffman tables
 		f.hl = &fixedHuffmanDecoder
 		f.hd = nil
 		f.huffmanBlockDecoder()()
-		if debugDecode {
-			fmt.Println("predefinied huffman block")
-		}
 	case 2:
 		// compressed, dynamic Huffman tables
 		if f.err = f.readHuffman(); f.err != nil {
@@ -347,9 +341,6 @@ func (f *decompressor) nextBlock() {
 		f.hl = &f.h1
 		f.hd = &f.h2
 		f.huffmanBlockDecoder()()
-		if debugDecode {
-			fmt.Println("dynamic huffman block")
-		}
 	default:
 		// 3 is reserved.
 		if debugDecode {

@@ -4,8 +4,6 @@ package version
 import (
 	"fmt"
 	"strings"
-
-	"github.com/openshift/installer/pkg/types"
 )
 
 // This file handles correctly identifying the default release version, which is expected to be
@@ -27,12 +25,6 @@ var (
 	// Commit is the commit hash from which the installer was built.
 	// Set in hack/build.sh.
 	Commit = ""
-
-	// defaultArch is the payload architecture for which the installer was built,
-	// which even on Linux may not be the same as the architecture of the
-	// installer binary itself.
-	// Set in hack/build.sh.
-	defaultArch = "amd64"
 
 	// defaultReleaseInfoPadded may be replaced in the binary with Release Metadata: Version that overrides defaultVersion as
 	// a null-terminated string within the allowed character length. This allows a distributor to override the payload
@@ -69,9 +61,4 @@ func Version() (string, error) {
 		return Raw, fmt.Errorf("release name was incorrectly replaced during extract")
 	}
 	return releaseName, nil
-}
-
-// DefaultArch returns the default release architecture
-func DefaultArch() types.Architecture {
-	return types.Architecture(defaultArch)
 }

@@ -16,7 +16,6 @@ const (
 	OpenShiftConsolePublicConfigMapName     = "console-public"
 	ServiceCAConfigMapName                  = "service-ca"
 	DefaultIngressCertConfigMapName         = "default-ingress-cert"
-	OAuthServingCertConfigMapName           = "oauth-serving-cert"
 	OpenShiftConsoleDeploymentName          = OpenShiftConsoleName
 	OpenShiftConsoleServiceName             = OpenShiftConsoleName
 	OpenshiftConsoleRedirectServiceName     = "console-redirect"
@@ -28,6 +27,7 @@ const (
 	OAuthClientName                         = OpenShiftConsoleName
 	OpenShiftConfigManagedNamespace         = "openshift-config-managed"
 	OpenShiftConfigNamespace                = "openshift-config"
+	OpenShiftMonitoringConfigMapName        = "monitoring-shared-config"
 	OpenShiftCustomLogoConfigMapName        = "custom-logo"
 	TrustedCAConfigMapName                  = "trusted-ca-bundle"
 	TrustedCABundleKey                      = "ca-bundle.crt"

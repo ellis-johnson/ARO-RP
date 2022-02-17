@@ -26,12 +26,13 @@ import (
 	"errors"
 	"fmt"
 
-	machinev1 "github.com/openshift/machine-api-operator/pkg/apis/machine/v1beta1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/klog"
-	"sigs.k8s.io/controller-runtime/pkg/scheme"
 	"sigs.k8s.io/yaml"
+
+	machinev1 "github.com/openshift/machine-api-operator/pkg/apis/machine/v1beta1"
+	"sigs.k8s.io/controller-runtime/pkg/scheme"
 )
 
 const GroupName = "ovirtproviderconfig"
@@ -49,6 +50,7 @@ func MachineSpecFromProviderSpec(providerSpec machinev1.ProviderSpec) (*OvirtMac
 	if providerSpec.Value == nil {
 		return nil, errors.New("no such providerSpec found in manifest")
 	}
+
 	var config OvirtMachineProviderSpec
 	if err := yaml.Unmarshal(providerSpec.Value.Raw, &config); err != nil {
 		return nil, err

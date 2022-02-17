@@ -76,9 +76,9 @@ func (w *Writer) GetWidth() (int, error) {
 	return tw, err
 }
 
-func (w *Writer) ansiCuuAndEd() error {
+func (w *Writer) ansiCuuAndEd() (err error) {
 	buf := make([]byte, 8)
 	buf = strconv.AppendInt(buf[:copy(buf, escOpen)], int64(w.lines), 10)
-	_, err := w.out.Write(append(buf, cuuAndEd...))
-	return err
+	_, err = w.out.Write(append(buf, cuuAndEd...))
+	return
 }

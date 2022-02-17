@@ -119,7 +119,6 @@ func OCI1IndexFromComponents(components []imgspecv1.Descriptor, annotations map[
 	index := OCI1Index{
 		imgspecv1.Index{
 			Versioned:   imgspec.Versioned{SchemaVersion: 2},
-			MediaType:   imgspecv1.MediaTypeImageIndex,
 			Manifests:   make([]imgspecv1.Descriptor, len(components)),
 			Annotations: dupStringStringMap(annotations),
 		},
@@ -196,17 +195,12 @@ func OCI1IndexFromManifest(manifest []byte) (*OCI1Index, error) {
 	index := OCI1Index{
 		Index: imgspecv1.Index{
 			Versioned:   imgspec.Versioned{SchemaVersion: 2},
-			MediaType:   imgspecv1.MediaTypeImageIndex,
 			Manifests:   []imgspecv1.Descriptor{},
 			Annotations: make(map[string]string),
 		},
 	}
 	if err := json.Unmarshal(manifest, &index); err != nil {
 		return nil, errors.Wrapf(err, "unmarshaling OCI1Index %q", string(manifest))
-	}
-	if err := validateUnambiguousManifestFormat(manifest, imgspecv1.MediaTypeImageIndex,
-		allowedFieldManifests); err != nil {
-		return nil, err
 	}
 	return &index, nil
 }

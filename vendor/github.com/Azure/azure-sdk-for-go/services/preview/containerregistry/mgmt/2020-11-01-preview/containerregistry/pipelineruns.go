@@ -79,7 +79,7 @@ func (client PipelineRunsClient) Create(ctx context.Context, resourceGroupName s
 
 	result, err = client.CreateSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "containerregistry.PipelineRunsClient", "Create", result.Response(), "Failure sending request")
+		err = autorest.NewErrorWithError(err, "containerregistry.PipelineRunsClient", "Create", nil, "Failure sending request")
 		return
 	}
 
@@ -114,7 +114,6 @@ func (client PipelineRunsClient) CreatePreparer(ctx context.Context, resourceGro
 // http.Response Body if it receives an error.
 func (client PipelineRunsClient) CreateSender(req *http.Request) (future PipelineRunsCreateFuture, err error) {
 	var resp *http.Response
-	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
@@ -176,7 +175,7 @@ func (client PipelineRunsClient) Delete(ctx context.Context, resourceGroupName s
 
 	result, err = client.DeleteSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "containerregistry.PipelineRunsClient", "Delete", result.Response(), "Failure sending request")
+		err = autorest.NewErrorWithError(err, "containerregistry.PipelineRunsClient", "Delete", nil, "Failure sending request")
 		return
 	}
 
@@ -209,7 +208,6 @@ func (client PipelineRunsClient) DeletePreparer(ctx context.Context, resourceGro
 // http.Response Body if it receives an error.
 func (client PipelineRunsClient) DeleteSender(req *http.Request) (future PipelineRunsDeleteFuture, err error) {
 	var resp *http.Response
-	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return

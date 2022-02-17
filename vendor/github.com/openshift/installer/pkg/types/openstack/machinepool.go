@@ -23,10 +23,6 @@ type MachinePool struct {
 	// +optional
 	AdditionalSecurityGroupIDs []string `json:"additionalSecurityGroupIDs,omitempty"`
 
-	// ServerGroupPolicy will be used to create the Server Group that will contain all the machines of this MachinePool.
-	// Defaults to "soft-anti-affinity".
-	ServerGroupPolicy ServerGroupPolicy `json:"serverGroupPolicy,omitempty"`
-
 	// Zones is the list of availability zones where the instances should be deployed.
 	// If no zones are provided, all instances will be deployed on OpenStack Nova default availability zone
 	// +optional
@@ -60,10 +56,6 @@ func (o *MachinePool) Set(required *MachinePool) {
 
 	if required.AdditionalSecurityGroupIDs != nil {
 		o.AdditionalSecurityGroupIDs = append(required.AdditionalSecurityGroupIDs[:0:0], required.AdditionalSecurityGroupIDs...)
-	}
-
-	if required.ServerGroupPolicy != "" {
-		o.ServerGroupPolicy = required.ServerGroupPolicy
 	}
 
 	if len(required.Zones) > 0 {

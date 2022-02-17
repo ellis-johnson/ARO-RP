@@ -70,7 +70,7 @@ func (client TokensClient) Create(ctx context.Context, resourceGroupName string,
 
 	result, err = client.CreateSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "containerregistry.TokensClient", "Create", result.Response(), "Failure sending request")
+		err = autorest.NewErrorWithError(err, "containerregistry.TokensClient", "Create", nil, "Failure sending request")
 		return
 	}
 
@@ -105,7 +105,6 @@ func (client TokensClient) CreatePreparer(ctx context.Context, resourceGroupName
 // http.Response Body if it receives an error.
 func (client TokensClient) CreateSender(req *http.Request) (future TokensCreateFuture, err error) {
 	var resp *http.Response
-	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
@@ -167,7 +166,7 @@ func (client TokensClient) Delete(ctx context.Context, resourceGroupName string,
 
 	result, err = client.DeleteSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "containerregistry.TokensClient", "Delete", result.Response(), "Failure sending request")
+		err = autorest.NewErrorWithError(err, "containerregistry.TokensClient", "Delete", nil, "Failure sending request")
 		return
 	}
 
@@ -200,7 +199,6 @@ func (client TokensClient) DeletePreparer(ctx context.Context, resourceGroupName
 // http.Response Body if it receives an error.
 func (client TokensClient) DeleteSender(req *http.Request) (future TokensDeleteFuture, err error) {
 	var resp *http.Response
-	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
@@ -482,7 +480,7 @@ func (client TokensClient) Update(ctx context.Context, resourceGroupName string,
 
 	result, err = client.UpdateSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "containerregistry.TokensClient", "Update", result.Response(), "Failure sending request")
+		err = autorest.NewErrorWithError(err, "containerregistry.TokensClient", "Update", nil, "Failure sending request")
 		return
 	}
 
@@ -517,7 +515,6 @@ func (client TokensClient) UpdatePreparer(ctx context.Context, resourceGroupName
 // http.Response Body if it receives an error.
 func (client TokensClient) UpdateSender(req *http.Request) (future TokensUpdateFuture, err error) {
 	var resp *http.Response
-	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return

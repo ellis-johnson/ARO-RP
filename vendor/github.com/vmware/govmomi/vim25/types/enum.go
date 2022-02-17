@@ -550,8 +550,6 @@ type CustomizationFailedReasonCode string
 const (
 	CustomizationFailedReasonCodeUserDefinedScriptDisabled = CustomizationFailedReasonCode("userDefinedScriptDisabled")
 	CustomizationFailedReasonCodeCustomizationDisabled     = CustomizationFailedReasonCode("customizationDisabled")
-	CustomizationFailedReasonCodeRawDataIsNotSupported     = CustomizationFailedReasonCode("rawDataIsNotSupported")
-	CustomizationFailedReasonCodeWrongMetadataFormat       = CustomizationFailedReasonCode("wrongMetadataFormat")
 )
 
 func init() {
@@ -817,7 +815,6 @@ const (
 	DistributedVirtualSwitchHostInfrastructureTrafficClassVsan           = DistributedVirtualSwitchHostInfrastructureTrafficClass("vsan")
 	DistributedVirtualSwitchHostInfrastructureTrafficClassVdp            = DistributedVirtualSwitchHostInfrastructureTrafficClass("vdp")
 	DistributedVirtualSwitchHostInfrastructureTrafficClassBackupNfc      = DistributedVirtualSwitchHostInfrastructureTrafficClass("backupNfc")
-	DistributedVirtualSwitchHostInfrastructureTrafficClassNvmetcp        = DistributedVirtualSwitchHostInfrastructureTrafficClass("nvmetcp")
 )
 
 func init() {
@@ -1403,19 +1400,6 @@ func init() {
 	t["HostDigestInfoDigestMethodType"] = reflect.TypeOf((*HostDigestInfoDigestMethodType)(nil)).Elem()
 }
 
-type HostDigestVerificationSetting string
-
-const (
-	HostDigestVerificationSettingDigestDisabled = HostDigestVerificationSetting("digestDisabled")
-	HostDigestVerificationSettingHeaderOnly     = HostDigestVerificationSetting("headerOnly")
-	HostDigestVerificationSettingDataOnly       = HostDigestVerificationSetting("dataOnly")
-	HostDigestVerificationSettingHeaderAndData  = HostDigestVerificationSetting("headerAndData")
-)
-
-func init() {
-	t["HostDigestVerificationSetting"] = reflect.TypeOf((*HostDigestVerificationSetting)(nil)).Elem()
-}
-
 type HostDisconnectedEventReasonCode string
 
 const (
@@ -1523,18 +1507,6 @@ const (
 
 func init() {
 	t["HostFirewallRuleProtocol"] = reflect.TypeOf((*HostFirewallRuleProtocol)(nil)).Elem()
-}
-
-type HostFruFruType string
-
-const (
-	HostFruFruTypeUndefined = HostFruFruType("undefined")
-	HostFruFruTypeBoard     = HostFruFruType("board")
-	HostFruFruTypeProduct   = HostFruFruType("product")
-)
-
-func init() {
-	t["HostFruFruType"] = reflect.TypeOf((*HostFruFruType)(nil)).Elem()
 }
 
 type HostGraphicsConfigGraphicsType string
@@ -1796,40 +1768,6 @@ func init() {
 	t["HostMaintenanceSpecPurpose"] = reflect.TypeOf((*HostMaintenanceSpecPurpose)(nil)).Elem()
 }
 
-type HostMemoryTierFlags string
-
-const (
-	HostMemoryTierFlagsMemoryTier     = HostMemoryTierFlags("memoryTier")
-	HostMemoryTierFlagsPersistentTier = HostMemoryTierFlags("persistentTier")
-	HostMemoryTierFlagsCachingTier    = HostMemoryTierFlags("cachingTier")
-)
-
-func init() {
-	t["HostMemoryTierFlags"] = reflect.TypeOf((*HostMemoryTierFlags)(nil)).Elem()
-}
-
-type HostMemoryTierType string
-
-const (
-	HostMemoryTierTypeDRAM = HostMemoryTierType("DRAM")
-	HostMemoryTierTypePMem = HostMemoryTierType("PMem")
-)
-
-func init() {
-	t["HostMemoryTierType"] = reflect.TypeOf((*HostMemoryTierType)(nil)).Elem()
-}
-
-type HostMemoryTieringType string
-
-const (
-	HostMemoryTieringTypeNoTiering       = HostMemoryTieringType("noTiering")
-	HostMemoryTieringTypeHardwareTiering = HostMemoryTieringType("hardwareTiering")
-)
-
-func init() {
-	t["HostMemoryTieringType"] = reflect.TypeOf((*HostMemoryTieringType)(nil)).Elem()
-}
-
 type HostMountInfoInaccessibleReason string
 
 const (
@@ -1967,7 +1905,6 @@ const (
 	HostNvmeTransportTypePcie         = HostNvmeTransportType("pcie")
 	HostNvmeTransportTypeFibreChannel = HostNvmeTransportType("fibreChannel")
 	HostNvmeTransportTypeRdma         = HostNvmeTransportType("rdma")
-	HostNvmeTransportTypeTcp          = HostNvmeTransportType("tcp")
 	HostNvmeTransportTypeLoopback     = HostNvmeTransportType("loopback")
 	HostNvmeTransportTypeUnsupported  = HostNvmeTransportType("unsupported")
 )
@@ -2135,28 +2072,6 @@ func init() {
 	t["HostProtocolEndpointProtocolEndpointType"] = reflect.TypeOf((*HostProtocolEndpointProtocolEndpointType)(nil)).Elem()
 }
 
-type HostPtpConfigDeviceType string
-
-const (
-	HostPtpConfigDeviceTypeNone           = HostPtpConfigDeviceType("none")
-	HostPtpConfigDeviceTypeVirtualNic     = HostPtpConfigDeviceType("virtualNic")
-	HostPtpConfigDeviceTypePciPassthruNic = HostPtpConfigDeviceType("pciPassthruNic")
-)
-
-func init() {
-	t["HostPtpConfigDeviceType"] = reflect.TypeOf((*HostPtpConfigDeviceType)(nil)).Elem()
-}
-
-type HostQualifiedNameType string
-
-const (
-	HostQualifiedNameTypeNvmeQualifiedName = HostQualifiedNameType("nvmeQualifiedName")
-)
-
-func init() {
-	t["HostQualifiedNameType"] = reflect.TypeOf((*HostQualifiedNameType)(nil)).Elem()
-}
-
 type HostRdmaDeviceConnectionState string
 
 const (
@@ -2198,17 +2113,6 @@ const (
 
 func init() {
 	t["HostRuntimeInfoNetStackInstanceRuntimeInfoState"] = reflect.TypeOf((*HostRuntimeInfoNetStackInstanceRuntimeInfoState)(nil)).Elem()
-}
-
-type HostRuntimeInfoStateEncryptionInfoProtectionMode string
-
-const (
-	HostRuntimeInfoStateEncryptionInfoProtectionModeNone = HostRuntimeInfoStateEncryptionInfoProtectionMode("none")
-	HostRuntimeInfoStateEncryptionInfoProtectionModeTpm  = HostRuntimeInfoStateEncryptionInfoProtectionMode("tpm")
-)
-
-func init() {
-	t["HostRuntimeInfoStateEncryptionInfoProtectionMode"] = reflect.TypeOf((*HostRuntimeInfoStateEncryptionInfoProtectionMode)(nil)).Elem()
 }
 
 type HostRuntimeInfoStatelessNvdsMigrationState string
@@ -2424,8 +2328,6 @@ const (
 	HostVirtualNicManagerNicTypeVsanWitness           = HostVirtualNicManagerNicType("vsanWitness")
 	HostVirtualNicManagerNicTypeVSphereBackupNFC      = HostVirtualNicManagerNicType("vSphereBackupNFC")
 	HostVirtualNicManagerNicTypePtp                   = HostVirtualNicManagerNicType("ptp")
-	HostVirtualNicManagerNicTypeNvmeTcp               = HostVirtualNicManagerNicType("nvmeTcp")
-	HostVirtualNicManagerNicTypeNvmeRdma              = HostVirtualNicManagerNicType("nvmeRdma")
 )
 
 func init() {
@@ -2569,7 +2471,6 @@ const (
 	IoFilterTypeInspection         = IoFilterType("inspection")
 	IoFilterTypeDatastoreIoControl = IoFilterType("datastoreIoControl")
 	IoFilterTypeDataProvider       = IoFilterType("dataProvider")
-	IoFilterTypeDataCapture        = IoFilterType("dataCapture")
 )
 
 func init() {
@@ -5047,17 +4948,6 @@ const (
 
 func init() {
 	t["VirtualMachineVideoCardUse3dRenderer"] = reflect.TypeOf((*VirtualMachineVideoCardUse3dRenderer)(nil)).Elem()
-}
-
-type VirtualMachineVirtualPMemSnapshotMode string
-
-const (
-	VirtualMachineVirtualPMemSnapshotModeIndependent_persistent    = VirtualMachineVirtualPMemSnapshotMode("independent_persistent")
-	VirtualMachineVirtualPMemSnapshotModeIndependent_eraseonrevert = VirtualMachineVirtualPMemSnapshotMode("independent_eraseonrevert")
-)
-
-func init() {
-	t["VirtualMachineVirtualPMemSnapshotMode"] = reflect.TypeOf((*VirtualMachineVirtualPMemSnapshotMode)(nil)).Elem()
 }
 
 type VirtualMachineWindowsQuiesceSpecVssBackupContext string

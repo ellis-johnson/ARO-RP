@@ -13,7 +13,7 @@ import (
 	"github.com/openshift/installer/pkg/asset/installconfig/aws"
 	icazure "github.com/openshift/installer/pkg/asset/installconfig/azure"
 	icgcp "github.com/openshift/installer/pkg/asset/installconfig/gcp"
-	icibmcloud "github.com/openshift/installer/pkg/asset/installconfig/ibmcloud"
+	ickubevirt "github.com/openshift/installer/pkg/asset/installconfig/kubevirt"
 	icopenstack "github.com/openshift/installer/pkg/asset/installconfig/openstack"
 	icovirt "github.com/openshift/installer/pkg/asset/installconfig/ovirt"
 	icvsphere "github.com/openshift/installer/pkg/asset/installconfig/vsphere"
@@ -29,11 +29,10 @@ const (
 
 // InstallConfig generates the install-config.yaml file.
 type InstallConfig struct {
-	Config   *types.InstallConfig `json:"config"`
-	File     *asset.File          `json:"file"`
-	AWS      *aws.Metadata        `json:"aws,omitempty"`
-	Azure    *icazure.Metadata    `json:"azure,omitempty"`
-	IBMCloud *icibmcloud.Metadata `json:"ibmcloud,omitempty"`
+	Config *types.InstallConfig `json:"config"`
+	File   *asset.File          `json:"file"`
+	AWS    *aws.Metadata        `json:"aws,omitempty"`
+	Azure  *icazure.Metadata    `json:"azure,omitempty"`
 }
 
 var _ asset.WritableAsset = (*InstallConfig)(nil)
@@ -90,9 +89,9 @@ func (a *InstallConfig) Generate(parents asset.Parents) error {
 	a.Config.VSphere = platform.VSphere
 	a.Config.Azure = platform.Azure
 	a.Config.GCP = platform.GCP
-	a.Config.IBMCloud = platform.IBMCloud
 	a.Config.BareMetal = platform.BareMetal
 	a.Config.Ovirt = platform.Ovirt
+	a.Config.Kubevirt = platform.Kubevirt
 
 	return a.finish("")
 }
@@ -145,10 +144,7 @@ func (a *InstallConfig) finish(filename string) error {
 		a.AWS = aws.NewMetadata(a.Config.Platform.AWS.Region, a.Config.Platform.AWS.Subnets, a.Config.AWS.ServiceEndpoints)
 	}
 	if a.Config.Azure != nil {
-		a.Azure = icazure.NewMetadata(a.Config.Azure.CloudName, a.Config.Azure.ARMEndpoint)
-	}
-	if a.Config.IBMCloud != nil {
-		a.IBMCloud = icibmcloud.NewMetadata(a.Config.BaseDomain)
+		a.Azure = icazure.NewMetadata(a.Config.Azure.CloudName, nil)
 	}
 	if err := validation.ValidateInstallConfig(a.Config).ToAggregate(); err != nil {
 		if filename == "" {
@@ -187,13 +183,6 @@ func (a *InstallConfig) platformValidation() error {
 		}
 		return icgcp.Validate(client, a.Config)
 	}
-	if a.Config.Platform.IBMCloud != nil {
-		client, err := icibmcloud.NewClient()
-		if err != nil {
-			return err
-		}
-		return icibmcloud.Validate(client, a.Config)
-	}
 	if a.Config.Platform.AWS != nil {
 		return aws.Validate(context.TODO(), a.AWS, a.Config)
 	}
@@ -205,6 +194,13 @@ func (a *InstallConfig) platformValidation() error {
 	}
 	if a.Config.Platform.OpenStack != nil {
 		return icopenstack.Validate(a.Config)
+	}
+	if a.Config.Platform.Kubevirt != nil {
+		client, err := ickubevirt.NewClient()
+		if err != nil {
+			return err
+		}
+		return ickubevirt.Validate(a.Config, client)
 	}
 	return field.ErrorList{}.ToAggregate()
 }

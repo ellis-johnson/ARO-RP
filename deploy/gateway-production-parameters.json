@@ -57,11 +57,9 @@
             "value": [
                 "eastasia",
                 "centralindia",
-                "centraluseuap",
                 "koreacentral",
                 "switzerlandnorth",
-                "northcentralus",
-                "uaenorth"
+                "northcentralus"
             ]
         },
         "rpImage": {

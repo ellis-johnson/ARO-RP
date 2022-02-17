@@ -297,7 +297,7 @@
             "singularName": "",
             "namespaced": true,
             "group": "policy",
-            "version": "v1",
+            "version": "v1beta1",
             "kind": "Eviction",
             "verbs": [
                 "create"

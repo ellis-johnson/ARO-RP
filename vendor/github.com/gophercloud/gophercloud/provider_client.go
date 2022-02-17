@@ -408,7 +408,11 @@ func (client *ProviderClient) doRequest(method, url string, options *RequestOpts
 
 	if options.MoreHeaders != nil {
 		for k, v := range options.MoreHeaders {
-			req.Header.Set(k, v)
+			if v != "" {
+				req.Header.Set(k, v)
+			} else {
+				req.Header.Del(k)
+			}
 		}
 	}
 
@@ -475,7 +479,6 @@ func (client *ProviderClient) doRequest(method, url string, options *RequestOpts
 				if err != nil {
 					e := &ErrUnableToReauthenticate{}
 					e.ErrOriginal = respErr
-					e.ErrReauth = err
 					return nil, e
 				}
 				if options.RawBody != nil {

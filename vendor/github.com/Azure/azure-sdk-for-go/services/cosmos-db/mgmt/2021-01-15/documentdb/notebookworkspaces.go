@@ -70,7 +70,7 @@ func (client NotebookWorkspacesClient) CreateOrUpdate(ctx context.Context, resou
 
 	result, err = client.CreateOrUpdateSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "documentdb.NotebookWorkspacesClient", "CreateOrUpdate", result.Response(), "Failure sending request")
+		err = autorest.NewErrorWithError(err, "documentdb.NotebookWorkspacesClient", "CreateOrUpdate", nil, "Failure sending request")
 		return
 	}
 
@@ -105,7 +105,6 @@ func (client NotebookWorkspacesClient) CreateOrUpdatePreparer(ctx context.Contex
 // http.Response Body if it receives an error.
 func (client NotebookWorkspacesClient) CreateOrUpdateSender(req *http.Request) (future NotebookWorkspacesCreateOrUpdateFuture, err error) {
 	var resp *http.Response
-	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
@@ -166,7 +165,7 @@ func (client NotebookWorkspacesClient) Delete(ctx context.Context, resourceGroup
 
 	result, err = client.DeleteSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "documentdb.NotebookWorkspacesClient", "Delete", result.Response(), "Failure sending request")
+		err = autorest.NewErrorWithError(err, "documentdb.NotebookWorkspacesClient", "Delete", nil, "Failure sending request")
 		return
 	}
 
@@ -199,7 +198,6 @@ func (client NotebookWorkspacesClient) DeletePreparer(ctx context.Context, resou
 // http.Response Body if it receives an error.
 func (client NotebookWorkspacesClient) DeleteSender(req *http.Request) (future NotebookWorkspacesDeleteFuture, err error) {
 	var resp *http.Response
-	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
@@ -531,7 +529,7 @@ func (client NotebookWorkspacesClient) RegenerateAuthToken(ctx context.Context, 
 
 	result, err = client.RegenerateAuthTokenSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "documentdb.NotebookWorkspacesClient", "RegenerateAuthToken", result.Response(), "Failure sending request")
+		err = autorest.NewErrorWithError(err, "documentdb.NotebookWorkspacesClient", "RegenerateAuthToken", nil, "Failure sending request")
 		return
 	}
 
@@ -564,7 +562,6 @@ func (client NotebookWorkspacesClient) RegenerateAuthTokenPreparer(ctx context.C
 // http.Response Body if it receives an error.
 func (client NotebookWorkspacesClient) RegenerateAuthTokenSender(req *http.Request) (future NotebookWorkspacesRegenerateAuthTokenFuture, err error) {
 	var resp *http.Response
-	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return
@@ -624,7 +621,7 @@ func (client NotebookWorkspacesClient) Start(ctx context.Context, resourceGroupN
 
 	result, err = client.StartSender(req)
 	if err != nil {
-		err = autorest.NewErrorWithError(err, "documentdb.NotebookWorkspacesClient", "Start", result.Response(), "Failure sending request")
+		err = autorest.NewErrorWithError(err, "documentdb.NotebookWorkspacesClient", "Start", nil, "Failure sending request")
 		return
 	}
 
@@ -657,7 +654,6 @@ func (client NotebookWorkspacesClient) StartPreparer(ctx context.Context, resour
 // http.Response Body if it receives an error.
 func (client NotebookWorkspacesClient) StartSender(req *http.Request) (future NotebookWorkspacesStartFuture, err error) {
 	var resp *http.Response
-	future.FutureAPI = &azure.Future{}
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
 		return

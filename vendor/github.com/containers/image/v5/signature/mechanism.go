@@ -9,11 +9,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	// This code is used only to parse the data in an explicitly-untrusted
-	// code path, where cryptography is not relevant. For now, continue to
-	// use this frozen deprecated implementation. When mechanism_openpgp.go
-	// migrates to another implementation, this should migrate as well.
-	"golang.org/x/crypto/openpgp" //nolint:staticcheck
+	"golang.org/x/crypto/openpgp"
 )
 
 // SigningMechanism abstracts a way to sign binary blobs and verify their signatures.

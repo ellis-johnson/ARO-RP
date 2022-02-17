@@ -32,6 +32,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/googleapis/gax-go/v2"
 )
 
 const (
@@ -315,7 +317,7 @@ func (c *Client) getETag(suffix string) (value, etag string, err error) {
 			code = res.StatusCode
 		}
 		if delay, shouldRetry := retryer.Retry(code, reqErr); shouldRetry {
-			if err := sleep(ctx, delay); err != nil {
+			if err := gax.Sleep(ctx, delay); err != nil {
 				return "", "", err
 			}
 			continue
@@ -323,7 +325,7 @@ func (c *Client) getETag(suffix string) (value, etag string, err error) {
 		break
 	}
 	if reqErr != nil {
-		return "", "", reqErr
+		return "", "", nil
 	}
 	defer res.Body.Close()
 	if res.StatusCode == http.StatusNotFound {

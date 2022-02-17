@@ -16,7 +16,6 @@ var (
 		azure.USGovernmentCloud: true,
 		azure.ChinaCloud:        true,
 		azure.GermanCloud:       true,
-		azure.StackCloud:        true,
 	}
 
 	validCloudNameValues = func() []string {
@@ -34,7 +33,7 @@ func ValidatePlatform(p *azure.Platform, publish types.PublishingStrategy, fldPa
 	if p.Region == "" {
 		allErrs = append(allErrs, field.Required(fldPath.Child("region"), "region should be set to one of the supported Azure regions"))
 	}
-	if !p.IsARO() && publish == types.ExternalPublishingStrategy {
+	if !p.ARO && publish == types.ExternalPublishingStrategy {
 		if p.BaseDomainResourceGroupName == "" {
 			allErrs = append(allErrs, field.Required(fldPath.Child("baseDomainResourceGroupName"), "baseDomainResourceGroupName is the resource group name where the azure dns zone is deployed"))
 		}
@@ -73,15 +72,6 @@ func ValidatePlatform(p *azure.Platform, publish types.PublishingStrategy, fldPa
 		allErrs = append(allErrs, field.Invalid(fldPath.Child("outboundType"), p.OutboundType, fmt.Sprintf("%s is only allowed when installing to pre-existing network", azure.UserDefinedRoutingOutboundType)))
 	}
 
-	switch cloud := p.CloudName; cloud {
-	case azure.StackCloud:
-		allErrs = append(allErrs, validateAzureStack(p, fldPath)...)
-	default:
-		if p.ARMEndpoint != "" {
-			allErrs = append(allErrs, field.Required(fldPath.Child("armEndpoint"), fmt.Sprintf("ARM endpoint must not be set when the cloud name is %s", cloud)))
-		}
-	}
-
 	return allErrs
 }
 
@@ -100,14 +90,3 @@ var (
 		return v
 	}()
 )
-
-func validateAzureStack(p *azure.Platform, fldPath *field.Path) field.ErrorList {
-	var allErrs field.ErrorList
-	if p.ARMEndpoint == "" {
-		allErrs = append(allErrs, field.Required(fldPath.Child("armEndpoint"), "ARM endpoint must be set when installing on Azure Stack"))
-	}
-	if p.OutboundType == azure.UserDefinedRoutingOutboundType {
-		allErrs = append(allErrs, field.Invalid(fldPath.Child("outboundType"), p.OutboundType, "Azure Stack does not support user-defined routing"))
-	}
-	return allErrs
-}

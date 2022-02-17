@@ -1,27 +1,13 @@
 # Change History
 
-## Breaking Changes
-
-### Struct Changes
-
-#### Removed Structs
-
-1. StorageAccountProperties
-
-#### Removed Struct Fields
-
-1. RegistryProperties.StorageAccount
-
 ## Additive Changes
 
-### Struct Changes
+### New Funcs
 
-#### New Structs
-
-1. OperationLogSpecificationDefinition
-
-#### New Struct Fields
-
-1. OperationServiceSpecificationDefinition.LogSpecifications
-1. RegistryProperties.AnonymousPullEnabled
-1. RegistryPropertiesUpdateParameters.AnonymousPullEnabled
+1. ActivationProperties.MarshalJSON() ([]byte, error)
+1. LoginServerProperties.MarshalJSON() ([]byte, error)
+1. ProxyResource.MarshalJSON() ([]byte, error)
+1. Status.MarshalJSON() ([]byte, error)
+1. StatusDetailProperties.MarshalJSON() ([]byte, error)
+1. TLSCertificateProperties.MarshalJSON() ([]byte, error)
+1. TLSProperties.MarshalJSON() ([]byte, error)

@@ -54,15 +54,13 @@ func (k *Key) addShadow(val string) error {
 		return errors.New("cannot add shadow to auto-increment or boolean key")
 	}
 
-	if !k.s.f.options.AllowDuplicateShadowValues {
-		// Deduplicate shadows based on their values.
-		if k.value == val {
+	// Deduplicate shadows based on their values.
+	if k.value == val {
+		return nil
+	}
+	for i := range k.shadows {
+		if k.shadows[i].value == val {
 			return nil
-		}
-		for i := range k.shadows {
-			if k.shadows[i].value == val {
-				return nil
-			}
 		}
 	}
 
@@ -113,9 +111,6 @@ func (k *Key) Value() string {
 // ValueWithShadows returns raw values of key and its shadows if any.
 func (k *Key) ValueWithShadows() []string {
 	if len(k.shadows) == 0 {
-		if k.value == "" {
-			return []string{}
-		}
 		return []string{k.value}
 	}
 	vals := make([]string, len(k.shadows)+1)

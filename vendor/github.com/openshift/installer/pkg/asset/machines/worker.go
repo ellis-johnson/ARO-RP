@@ -12,8 +12,8 @@ import (
 	baremetalprovider "github.com/metal3-io/cluster-api-provider-baremetal/pkg/apis/baremetal/v1alpha1"
 	gcpapi "github.com/openshift/cluster-api-provider-gcp/pkg/apis"
 	gcpprovider "github.com/openshift/cluster-api-provider-gcp/pkg/apis/gcpprovider/v1beta1"
-	ibmcloudapi "github.com/openshift/cluster-api-provider-ibmcloud/pkg/apis"
-	ibmcloudprovider "github.com/openshift/cluster-api-provider-ibmcloud/pkg/apis/ibmcloudprovider/v1beta1"
+	kubevirtproviderapi "github.com/openshift/cluster-api-provider-kubevirt/pkg/apis"
+	kubevirtprovider "github.com/openshift/cluster-api-provider-kubevirt/pkg/apis/kubevirtprovider/v1alpha1"
 	libvirtapi "github.com/openshift/cluster-api-provider-libvirt/pkg/apis"
 	libvirtprovider "github.com/openshift/cluster-api-provider-libvirt/pkg/apis/libvirtproviderconfig/v1beta1"
 	ovirtproviderapi "github.com/openshift/cluster-api-provider-ovirt/pkg/apis"
@@ -41,7 +41,7 @@ import (
 	"github.com/openshift/installer/pkg/asset/machines/azure"
 	"github.com/openshift/installer/pkg/asset/machines/baremetal"
 	"github.com/openshift/installer/pkg/asset/machines/gcp"
-	"github.com/openshift/installer/pkg/asset/machines/ibmcloud"
+	"github.com/openshift/installer/pkg/asset/machines/kubevirt"
 	"github.com/openshift/installer/pkg/asset/machines/libvirt"
 	"github.com/openshift/installer/pkg/asset/machines/machineconfig"
 	"github.com/openshift/installer/pkg/asset/machines/openstack"
@@ -57,7 +57,7 @@ import (
 	azuredefaults "github.com/openshift/installer/pkg/types/azure/defaults"
 	baremetaltypes "github.com/openshift/installer/pkg/types/baremetal"
 	gcptypes "github.com/openshift/installer/pkg/types/gcp"
-	ibmcloudtypes "github.com/openshift/installer/pkg/types/ibmcloud"
+	kubevirttypes "github.com/openshift/installer/pkg/types/kubevirt"
 	libvirttypes "github.com/openshift/installer/pkg/types/libvirt"
 	nonetypes "github.com/openshift/installer/pkg/types/none"
 	openstacktypes "github.com/openshift/installer/pkg/types/openstack"
@@ -111,12 +111,6 @@ func defaultGCPMachinePoolPlatform() gcptypes.MachinePool {
 	}
 }
 
-func defaultIBMCloudMachinePoolPlatform() ibmcloudtypes.MachinePool {
-	return ibmcloudtypes.MachinePool{
-		InstanceType: "bx2d-4x16",
-	}
-}
-
 func defaultOpenStackMachinePoolPlatform() openstacktypes.MachinePool {
 	return openstacktypes.MachinePool{
 		Zones: []string{""},
@@ -137,15 +131,14 @@ func defaultOvirtMachinePoolPlatform() ovirttypes.MachinePool {
 		OSDisk: &ovirttypes.Disk{
 			SizeGB: 120,
 		},
-		VMType:            ovirttypes.VMTypeServer,
-		AutoPinningPolicy: ovirttypes.AutoPinningNone,
+		VMType: ovirttypes.VMTypeServer,
 	}
 }
 
 func defaultVSphereMachinePoolPlatform() vspheretypes.MachinePool {
 	return vspheretypes.MachinePool{
 		NumCPUs:           2,
-		NumCoresPerSocket: 2,
+		NumCoresPerSocket: 1,
 		MemoryMiB:         8192,
 		OSDisk: vspheretypes.OSDisk{
 			DiskSizeGB: 120,
@@ -153,8 +146,16 @@ func defaultVSphereMachinePoolPlatform() vspheretypes.MachinePool {
 	}
 }
 
-func awsDefaultWorkerMachineTypes(region string, arch types.Architecture) []string {
-	classes := awsdefaults.InstanceClasses(region, arch)
+func defaultKubevirtMachinePoolPlatform() kubevirttypes.MachinePool {
+	return kubevirttypes.MachinePool{
+		CPU:         4,
+		Memory:      "16G",
+		StorageSize: "120Gi",
+	}
+}
+
+func awsDefaultWorkerMachineTypes(region string) []string {
+	classes := awsdefaults.InstanceClasses(region)
 	types := make([]string, len(classes))
 	for i, c := range classes {
 		types[i] = fmt.Sprintf("%s.large", c)
@@ -255,7 +256,6 @@ func (w *Worker) Generate(dependencies asset.Parents) error {
 
 			mpool.Set(ic.Platform.AWS.DefaultMachinePlatform)
 			mpool.Set(pool.Platform.AWS)
-			zoneDefaults := false
 			if len(mpool.Zones) == 0 {
 				if len(subnets) > 0 {
 					for zone := range subnets {
@@ -266,24 +266,15 @@ func (w *Worker) Generate(dependencies asset.Parents) error {
 					if err != nil {
 						return err
 					}
-					zoneDefaults = true
 				}
 			}
 			if mpool.InstanceType == "" {
-				mpool.InstanceType, err = aws.PreferredInstanceType(ctx, installConfig.AWS, awsDefaultWorkerMachineTypes(installConfig.Config.Platform.AWS.Region, installConfig.Config.ControlPlane.Architecture), mpool.Zones)
+				mpool.InstanceType, err = aws.PreferredInstanceType(ctx, installConfig.AWS, awsDefaultWorkerMachineTypes(installConfig.Config.Platform.AWS.Region), mpool.Zones)
 				if err != nil {
 					logrus.Warn(errors.Wrap(err, "failed to find default instance type"))
-					mpool.InstanceType = awsDefaultWorkerMachineTypes(installConfig.Config.Platform.AWS.Region, installConfig.Config.ControlPlane.Architecture)[0]
+					mpool.InstanceType = awsDefaultWorkerMachineTypes(installConfig.Config.Platform.AWS.Region)[0]
 				}
 			}
-			// if the list of zones is the default we need to try to filter the list in case there are some zones where the instance might not be available
-			if zoneDefaults {
-				mpool.Zones, err = aws.FilterZonesBasedOnInstanceType(ctx, installConfig.AWS, mpool.InstanceType, mpool.Zones)
-				if err != nil {
-					logrus.Warn(errors.Wrap(err, "failed to filter zone list"))
-				}
-			}
-
 			pool.Platform.AWS = &mpool
 			sets, err := aws.MachineSets(
 				clusterID.InfraID,
@@ -302,10 +293,7 @@ func (w *Worker) Generate(dependencies asset.Parents) error {
 			}
 		case azuretypes.Name:
 			mpool := defaultAzureMachinePoolPlatform()
-			mpool.InstanceType = azuredefaults.ComputeInstanceType(
-				installConfig.Config.Platform.Azure.CloudName,
-				installConfig.Config.Platform.Azure.Region,
-			)
+			mpool.InstanceType = azuredefaults.ComputeInstanceType(installConfig.Config.Platform.Azure.Region)
 			mpool.Set(ic.Platform.Azure.DefaultMachinePlatform)
 			mpool.Set(pool.Platform.Azure)
 			if len(mpool.Zones) == 0 {
@@ -364,25 +352,6 @@ func (w *Worker) Generate(dependencies asset.Parents) error {
 			for _, set := range sets {
 				machineSets = append(machineSets, set)
 			}
-		case ibmcloudtypes.Name:
-			mpool := defaultIBMCloudMachinePoolPlatform()
-			mpool.Set(ic.Platform.IBMCloud.DefaultMachinePlatform)
-			mpool.Set(pool.Platform.IBMCloud)
-			if len(mpool.Zones) == 0 {
-				azs, err := ibmcloud.AvailabilityZones(ic.Platform.IBMCloud.Region)
-				if err != nil {
-					return errors.Wrap(err, "failed to fetch availability zones")
-				}
-				mpool.Zones = azs
-			}
-			pool.Platform.IBMCloud = &mpool
-			sets, err := ibmcloud.MachineSets(clusterID.InfraID, ic, &pool, "worker", "worker-user-data")
-			if err != nil {
-				return errors.Wrap(err, "failed to create worker machine objects")
-			}
-			for _, set := range sets {
-				machineSets = append(machineSets, set)
-			}
 		case libvirttypes.Name:
 			mpool := defaultLibvirtMachinePoolPlatform()
 			mpool.Set(ic.Platform.Libvirt.DefaultMachinePlatform)
@@ -435,6 +404,21 @@ func (w *Worker) Generate(dependencies asset.Parents) error {
 			sets, err := ovirt.MachineSets(clusterID.InfraID, ic, &pool, imageName, "worker", "worker-user-data")
 			if err != nil {
 				return errors.Wrap(err, "failed to create worker machine objects for ovirt provider")
+			}
+			for _, set := range sets {
+				machineSets = append(machineSets, set)
+			}
+		case kubevirttypes.Name:
+			mpool := defaultKubevirtMachinePoolPlatform()
+			mpool.Set(ic.Platform.Kubevirt.DefaultMachinePlatform)
+			mpool.Set(pool.Platform.Kubevirt)
+			pool.Platform.Kubevirt = &mpool
+
+			imageName, _ := rhcosutils.GenerateOpenStackImageName(string(*rhcosImage), clusterID.InfraID)
+
+			sets, err := kubevirt.MachineSets(clusterID.InfraID, ic, &pool, imageName, "worker", "worker-user-data")
+			if err != nil {
+				return errors.Wrap(err, "failed to create worker machine objects for kubevirt provider")
 			}
 			for _, set := range sets {
 				machineSets = append(machineSets, set)
@@ -519,21 +503,21 @@ func (w *Worker) MachineSets() ([]machineapi.MachineSet, error) {
 	azureapi.AddToScheme(scheme)
 	baremetalapi.AddToScheme(scheme)
 	gcpapi.AddToScheme(scheme)
-	ibmcloudapi.AddToScheme(scheme)
 	libvirtapi.AddToScheme(scheme)
 	openstackapi.AddToScheme(scheme)
 	ovirtproviderapi.AddToScheme(scheme)
 	vsphereproviderapi.AddToScheme(scheme)
+	kubevirtproviderapi.AddToScheme(scheme)
 	decoder := serializer.NewCodecFactory(scheme).UniversalDecoder(
 		awsprovider.SchemeGroupVersion,
 		azureprovider.SchemeGroupVersion,
 		baremetalprovider.SchemeGroupVersion,
 		gcpprovider.SchemeGroupVersion,
-		ibmcloudprovider.SchemeGroupVersion,
 		libvirtprovider.SchemeGroupVersion,
 		openstackprovider.SchemeGroupVersion,
 		ovirtprovider.SchemeGroupVersion,
 		vsphereprovider.SchemeGroupVersion,
+		kubevirtprovider.SchemeGroupVersion,
 	)
 
 	machineSets := []machineapi.MachineSet{}

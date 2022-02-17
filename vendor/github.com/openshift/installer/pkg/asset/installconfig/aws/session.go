@@ -1,7 +1,6 @@
 package aws
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -191,9 +190,6 @@ func getUserCredentials() error {
 	}
 
 	path := defaults.SharedCredentialsFilename()
-	if env := os.Getenv("AWS_SHARED_CREDENTIALS_FILE"); env != "" {
-		path = env
-	}
 	logrus.Infof("Writing AWS credentials to %q (https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)", path)
 	err = os.MkdirAll(filepath.Dir(path), 0700)
 	if err != nil {
@@ -202,11 +198,12 @@ func getUserCredentials() error {
 
 	creds, err := ini.Load(path)
 	if err != nil {
-		if !os.IsNotExist(err) {
-			return errors.Wrap(err, fmt.Sprintf("failed to load credentials file %s", path))
+		if os.IsNotExist(err) {
+			creds = ini.Empty()
+			creds.Section("").Comment = "https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html"
+		} else {
+			return err
 		}
-		creds = ini.Empty()
-		creds.Section("").Comment = "https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html"
 	}
 
 	profile := os.Getenv("AWS_PROFILE")

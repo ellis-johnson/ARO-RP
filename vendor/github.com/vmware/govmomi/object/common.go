@@ -25,7 +25,6 @@ import (
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
-	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -134,15 +133,4 @@ func (c Common) SetCustomValue(ctx context.Context, key string, value string) er
 
 	_, err := methods.SetCustomValue(ctx, c.c, &req)
 	return err
-}
-
-func ReferenceFromString(s string) *types.ManagedObjectReference {
-	var ref types.ManagedObjectReference
-	if !ref.FromString(s) {
-		return nil
-	}
-	if mo.IsManagedObjectType(ref.Type) {
-		return &ref
-	}
-	return nil
 }

@@ -5,7 +5,6 @@ import (
 	"net"
 	"net/url"
 	"os"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -13,8 +12,6 @@ import (
 	dockerref "github.com/containers/image/docker/reference"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/crypto/ssh"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
@@ -29,8 +26,8 @@ import (
 	baremetalvalidation "github.com/openshift/installer/pkg/types/baremetal/validation"
 	"github.com/openshift/installer/pkg/types/gcp"
 	gcpvalidation "github.com/openshift/installer/pkg/types/gcp/validation"
-	"github.com/openshift/installer/pkg/types/ibmcloud"
-	ibmcloudvalidation "github.com/openshift/installer/pkg/types/ibmcloud/validation"
+	"github.com/openshift/installer/pkg/types/kubevirt"
+	kubevirtvalidation "github.com/openshift/installer/pkg/types/kubevirt/validation"
 	"github.com/openshift/installer/pkg/types/libvirt"
 	libvirtvalidation "github.com/openshift/installer/pkg/types/libvirt/validation"
 	"github.com/openshift/installer/pkg/types/openstack"
@@ -61,17 +58,11 @@ func ValidateInstallConfig(c *types.InstallConfig) field.ErrorList {
 	default:
 		return field.ErrorList{field.Invalid(field.NewPath("apiVersion"), c.TypeMeta.APIVersion, fmt.Sprintf("install-config version must be %q", types.InstallConfigVersion))}
 	}
-
 	if c.SSHKey != "" {
-		if c.FIPS == true {
-			allErrs = append(allErrs, validateFIPSconfig(c)...)
-		} else {
-			if err := validate.SSHPublicKey(c.SSHKey); err != nil {
-				allErrs = append(allErrs, field.Invalid(field.NewPath("sshKey"), c.SSHKey, err.Error()))
-			}
+		if err := validate.SSHPublicKey(c.SSHKey); err != nil {
+			allErrs = append(allErrs, field.Invalid(field.NewPath("sshKey"), c.SSHKey, err.Error()))
 		}
 	}
-
 	if c.AdditionalTrustBundle != "" {
 		if err := validate.CABundle(c.AdditionalTrustBundle); err != nil {
 			allErrs = append(allErrs, field.Invalid(field.NewPath("additionalTrustBundle"), c.AdditionalTrustBundle, err.Error()))
@@ -122,7 +113,7 @@ func ValidateInstallConfig(c *types.InstallConfig) field.ErrorList {
 	if _, ok := validPublishingStrategies[c.Publish]; !ok {
 		allErrs = append(allErrs, field.NotSupported(field.NewPath("publish"), c.Publish, validPublishingStrategyValues))
 	}
-	allErrs = append(allErrs, validateCloudCredentialsMode(c.CredentialsMode, field.NewPath("credentialsMode"), c.Platform)...)
+	allErrs = append(allErrs, validateCloudCredentialsMode(c.CredentialsMode, field.NewPath("credentialsMode"), c.Platform.Name())...)
 
 	if c.Publish == types.InternalPublishingStrategy {
 		switch platformName := c.Platform.Name(); platformName {
@@ -135,53 +126,40 @@ func ValidateInstallConfig(c *types.InstallConfig) field.ErrorList {
 	return allErrs
 }
 
-// ipAddressType indicates the address types provided for a given field
-type ipAddressType struct {
-	IPv4    bool
-	IPv6    bool
-	Primary corev1.IPFamily
-}
+// ipAddressTypeByField is a map of field path to whether they request IPv4 or IPv6.
+type ipAddressTypeByField map[string]struct{ IPv4, IPv6 bool }
 
-// ipAddressTypeByField is a map of field path to ipAddressType
-type ipAddressTypeByField map[string]ipAddressType
-
-// ipNetByField is a map of field path to the IPNets
-type ipNetByField map[string][]ipnet.IPNet
+// ipByField is a map of field path to the net.IPs in sorted order.
+type ipByField map[string][]net.IP
 
 // inferIPVersionFromInstallConfig infers the user's desired ip version from the networking config.
 // Presence field names match the field path of the struct within the Networking type. This function
 // assumes a valid install config.
-func inferIPVersionFromInstallConfig(n *types.Networking) (hasIPv4, hasIPv6 bool, presence ipAddressTypeByField, addresses ipNetByField) {
+func inferIPVersionFromInstallConfig(n *types.Networking) (hasIPv4, hasIPv6 bool, presence ipAddressTypeByField, addresses ipByField) {
 	if n == nil {
 		return
 	}
-	addresses = make(ipNetByField)
+	addresses = make(ipByField)
 	for _, network := range n.MachineNetwork {
-		addresses["machineNetwork"] = append(addresses["machineNetwork"], network.CIDR)
+		addresses["machineNetwork"] = append(addresses["machineNetwork"], network.CIDR.IP)
 	}
 	for _, network := range n.ServiceNetwork {
-		addresses["serviceNetwork"] = append(addresses["serviceNetwork"], network)
+		addresses["serviceNetwork"] = append(addresses["serviceNetwork"], network.IP)
 	}
 	for _, network := range n.ClusterNetwork {
-		addresses["clusterNetwork"] = append(addresses["clusterNetwork"], network.CIDR)
+		addresses["clusterNetwork"] = append(addresses["clusterNetwork"], network.CIDR.IP)
 	}
 	presence = make(ipAddressTypeByField)
-	for k, ipnets := range addresses {
-		for i, ipnet := range ipnets {
+	for k, ips := range addresses {
+		for _, ip := range ips {
 			has := presence[k]
-			if ipnet.IP.To4() != nil {
+			if ip.To4() != nil {
 				has.IPv4 = true
-				if i == 0 {
-					has.Primary = corev1.IPv4Protocol
-				}
 				if k == "serviceNetwork" {
 					hasIPv4 = true
 				}
 			} else {
 				has.IPv6 = true
-				if i == 0 {
-					has.Primary = corev1.IPv6Protocol
-				}
 				if k == "serviceNetwork" {
 					hasIPv6 = true
 				}
@@ -192,11 +170,20 @@ func inferIPVersionFromInstallConfig(n *types.Networking) (hasIPv4, hasIPv6 bool
 	return
 }
 
+func ipSliceToStrings(ips []net.IP) []string {
+	var s []string
+	for _, ip := range ips {
+		s = append(s, ip.String())
+	}
+	return s
+}
+
 func ipnetworksToStrings(networks []ipnet.IPNet) []string {
 	var diag []string
 	for _, sn := range networks {
 		diag = append(diag, sn.String())
 	}
+	sort.Strings(diag)
 	return diag
 }
 
@@ -222,40 +209,18 @@ func validateNetworkingIPVersion(n *types.Networking, p *types.Platform) field.E
 		case p.Azure != nil && experimentalDualStackEnabled:
 			logrus.Warnf("Using experimental Azure dual-stack support")
 		case p.BareMetal != nil:
-			apiVIPIPFamily := corev1.IPv6Protocol
-			if net.ParseIP(p.BareMetal.APIVIP).To4() != nil {
-				apiVIPIPFamily = corev1.IPv4Protocol
-			}
-
-			if apiVIPIPFamily != presence["machineNetwork"].Primary {
-				allErrs = append(allErrs, field.Invalid(field.NewPath("networking", "baremetal", "apiVIP"), p.BareMetal.APIVIP, "VIP for the API must be of the same IP family with machine network's primary IP Family for dual-stack IPv4/IPv6"))
-			}
-
-			ingressVIPIPFamily := corev1.IPv6Protocol
-			if net.ParseIP(p.BareMetal.IngressVIP).To4() != nil {
-				ingressVIPIPFamily = corev1.IPv4Protocol
-			}
-
-			if ingressVIPIPFamily != presence["machineNetwork"].Primary {
-				allErrs = append(allErrs, field.Invalid(field.NewPath("networking", "baremetal", "ingressVIP"), p.BareMetal.IngressVIP, "VIP for the Ingress must be of the same IP family with machine network's primary IP Family for dual-stack IPv4/IPv6"))
-			}
 		case p.None != nil:
 		default:
 			allErrs = append(allErrs, field.Invalid(field.NewPath("networking"), "DualStack", "dual-stack IPv4/IPv6 is not supported for this platform, specify only one type of address"))
 		}
 		for k, v := range presence {
 			switch {
+			case k == "machineNetwork" && p.AWS != nil:
+				// AWS can default an ipv6 subnet
 			case v.IPv4 && !v.IPv6:
-				allErrs = append(allErrs, field.Invalid(field.NewPath("networking", k), strings.Join(ipnetworksToStrings(addresses[k]), ", "), "dual-stack IPv4/IPv6 requires an IPv6 network in this list"))
+				allErrs = append(allErrs, field.Invalid(field.NewPath("networking", k), strings.Join(ipSliceToStrings(addresses[k]), ", "), "dual-stack IPv4/IPv6 requires an IPv6 address in this list"))
 			case !v.IPv4 && v.IPv6:
-				allErrs = append(allErrs, field.Invalid(field.NewPath("networking", k), strings.Join(ipnetworksToStrings(addresses[k]), ", "), "dual-stack IPv4/IPv6 requires an IPv4 network in this list"))
-			}
-
-			// FIXME: we should allow either all-networks-IPv4Primary or
-			// all-networks-IPv6Primary, but the latter currently causes
-			// confusing install failures, so block it.
-			if v.IPv4 && v.IPv6 && v.Primary != corev1.IPv4Protocol {
-				allErrs = append(allErrs, field.Invalid(field.NewPath("networking", k), strings.Join(ipnetworksToStrings(addresses[k]), ", "), "IPv4 addresses must be listed before IPv6 addresses"))
+				allErrs = append(allErrs, field.Invalid(field.NewPath("networking", k), strings.Join(ipSliceToStrings(addresses[k]), ", "), "dual-stack IPv4/IPv6 requires an IPv4 address in this list"))
 			}
 		}
 
@@ -267,8 +232,6 @@ func validateNetworkingIPVersion(n *types.Networking, p *types.Platform) field.E
 		switch {
 		case p.BareMetal != nil:
 		case p.None != nil:
-		case p.Azure != nil && p.Azure.CloudName == azure.StackCloud:
-			allErrs = append(allErrs, field.Invalid(field.NewPath("networking"), "IPv6", "Azure Stack does not support IPv6"))
 		default:
 			allErrs = append(allErrs, field.Invalid(field.NewPath("networking"), "IPv6", "single-stack IPv6 is not supported for this platform"))
 		}
@@ -307,7 +270,7 @@ func validateNetworking(n *types.Networking, fldPath *field.Path) field.ErrorLis
 	}
 
 	for i, sn := range n.ServiceNetwork {
-		if err := validate.ServiceSubnetCIDR(&sn.IPNet); err != nil {
+		if err := validate.SubnetCIDR(&sn.IPNet); err != nil {
 			allErrs = append(allErrs, field.Invalid(fldPath.Child("serviceNetwork").Index(i), sn.String(), err.Error()))
 		}
 		for _, network := range n.MachineNetwork {
@@ -469,9 +432,6 @@ func validatePlatform(platform *types.Platform, fldPath *field.Path, network *ty
 	if platform.GCP != nil {
 		validate(gcp.Name, platform.GCP, func(f *field.Path) field.ErrorList { return gcpvalidation.ValidatePlatform(platform.GCP, f) })
 	}
-	if platform.IBMCloud != nil {
-		validate(ibmcloud.Name, platform.IBMCloud, func(f *field.Path) field.ErrorList { return ibmcloudvalidation.ValidatePlatform(platform.IBMCloud, f) })
-	}
 	if platform.Libvirt != nil {
 		validate(libvirt.Name, platform.Libvirt, func(f *field.Path) field.ErrorList { return libvirtvalidation.ValidatePlatform(platform.Libvirt, f) })
 	}
@@ -491,6 +451,11 @@ func validatePlatform(platform *types.Platform, fldPath *field.Path, network *ty
 	if platform.Ovirt != nil {
 		validate(ovirt.Name, platform.Ovirt, func(f *field.Path) field.ErrorList {
 			return ovirtvalidation.ValidatePlatform(platform.Ovirt, f)
+		})
+	}
+	if platform.Kubevirt != nil {
+		validate(kubevirt.Name, platform.Kubevirt, func(f *field.Path) field.ErrorList {
+			return kubevirtvalidation.ValidatePlatform(platform.Kubevirt, f, c)
 		})
 	}
 	return allErrs
@@ -577,26 +542,19 @@ var (
 	}()
 )
 
-func validateCloudCredentialsMode(mode types.CredentialsMode, fldPath *field.Path, platform types.Platform) field.ErrorList {
+func validateCloudCredentialsMode(mode types.CredentialsMode, fldPath *field.Path, platform string) field.ErrorList {
 	if mode == "" {
 		return nil
 	}
 	allErrs := field.ErrorList{}
-
-	allowedAzureModes := []types.CredentialsMode{types.MintCredentialsMode, types.PassthroughCredentialsMode, types.ManualCredentialsMode}
-	if platform.Azure != nil && platform.Azure.CloudName == azure.StackCloud {
-		allowedAzureModes = []types.CredentialsMode{types.ManualCredentialsMode}
-	}
-
 	// validPlatformCredentialsModes is a map from the platform name to a slice of credentials modes that are valid
 	// for the platform. If a platform name is not in the map, then the credentials mode cannot be set for that platform.
 	validPlatformCredentialsModes := map[string][]types.CredentialsMode{
-		aws.Name:      {types.MintCredentialsMode, types.PassthroughCredentialsMode, types.ManualCredentialsMode},
-		azure.Name:    allowedAzureModes,
-		gcp.Name:      {types.MintCredentialsMode, types.PassthroughCredentialsMode, types.ManualCredentialsMode},
-		ibmcloud.Name: {types.ManualCredentialsMode},
+		aws.Name:   {types.MintCredentialsMode, types.PassthroughCredentialsMode, types.ManualCredentialsMode},
+		azure.Name: {types.MintCredentialsMode, types.PassthroughCredentialsMode, types.ManualCredentialsMode},
+		gcp.Name:   {types.MintCredentialsMode, types.PassthroughCredentialsMode, types.ManualCredentialsMode},
 	}
-	if validModes, ok := validPlatformCredentialsModes[platform.Name()]; ok {
+	if validModes, ok := validPlatformCredentialsModes[platform]; ok {
 		validModesSet := sets.NewString()
 		for _, m := range validModes {
 			validModesSet.Insert(string(m))
@@ -605,7 +563,7 @@ func validateCloudCredentialsMode(mode types.CredentialsMode, fldPath *field.Pat
 			allErrs = append(allErrs, field.NotSupported(fldPath, mode, validModesSet.List()))
 		}
 	} else {
-		allErrs = append(allErrs, field.Invalid(fldPath, mode, fmt.Sprintf("cannot be set when using the %q platform", platform.Name())))
+		allErrs = append(allErrs, field.Invalid(fldPath, mode, fmt.Sprintf("cannot be set when using the %q platform", platform)))
 	}
 	return allErrs
 }
@@ -652,24 +610,6 @@ func validateIPProxy(proxy string, n *types.Networking, fldPath *field.Path) fie
 		if network.Contains(proxyIP) {
 			allErrs = append(allErrs, field.Invalid(fldPath, proxy, "proxy value is part of the service networks"))
 			break
-		}
-	}
-	return allErrs
-}
-
-// validateFIPSconfig checks if the current install-config is compatible with FIPS standards
-// and returns an error if it's not the case. As of this writing, only rsa or ecdsa algorithms are supported
-// for ssh keys on FIPS.
-func validateFIPSconfig(c *types.InstallConfig) field.ErrorList {
-	allErrs := field.ErrorList{}
-	sshParsedKey, _, _, _, err := ssh.ParseAuthorizedKey([]byte(c.SSHKey))
-	if err != nil {
-		allErrs = append(allErrs, field.Invalid(field.NewPath("sshKey"), c.SSHKey, fmt.Sprintf("Fatal error trying to parse configured public key: %s", err)))
-	} else {
-		sshKeyType := sshParsedKey.Type()
-		re := regexp.MustCompile(`^ecdsa-sha2-nistp\d{3}$|^ssh-rsa$`)
-		if !re.MatchString(sshKeyType) {
-			allErrs = append(allErrs, field.Invalid(field.NewPath("sshKey"), c.SSHKey, fmt.Sprintf("SSH key type %s unavailable when FIPS is enabled. Please use rsa or ecdsa.", sshKeyType)))
 		}
 	}
 	return allErrs

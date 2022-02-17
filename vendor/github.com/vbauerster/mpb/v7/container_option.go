@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"sync"
 	"time"
+
+	"github.com/vbauerster/mpb/v7/internal"
 )
 
 // ContainerOption is a func option to alter default behavior of a bar
@@ -99,12 +101,9 @@ func PopCompletedMode() ContainerOption {
 	}
 }
 
-// ContainerOptional will invoke provided option only when cond is true.
-func ContainerOptional(option ContainerOption, cond bool) ContainerOption {
-	if cond {
-		return option
-	}
-	return nil
+// ContainerOptional will invoke provided option only when pick is true.
+func ContainerOptional(option ContainerOption, pick bool) ContainerOption {
+	return ContainerOptOn(option, internal.Predicate(pick))
 }
 
 // ContainerOptOn will invoke provided option only when higher order
