@@ -1,6 +1,4 @@
 import {
-  IPanelHeaderRenderer,
-  IPanelProps,
   IPanelStyles,
   Panel,
   PanelType,
@@ -202,9 +200,6 @@ export function ClusterDetailPanel(props: {
   }
 
   const onRenderHeader = (
-    _props?: IPanelProps,
-    defaultRender?: IPanelHeaderRenderer,
-    headerTextId?: string | undefined
   ): ReactElement => {
     return (
       <>

@@ -98,7 +98,11 @@ proxy:
 	go build -ldflags "-X github.com/Azure/ARO-RP/pkg/util/version.GitCommit=$(COMMIT)" ./hack/proxy
 
 run-portal:
+<<<<<<< HEAD
 	go run -tags containers_image_openpgp aro -ldflags "-X github.com/Azure/ARO-RP/pkg/util/version.GitCommit=$(COMMIT)" ./cmd/aro portal
+=======
+	go run -tags aro,containers_image_openpgp -ldflags "-X github.com/Azure/ARO-RP/pkg/util/version.GitCommit=$(COMMIT)" ./cmd/aro portal
+>>>>>>> feature/admin-portal-3
 
 build-portal:
 	cd portal && npm install && npm run build
