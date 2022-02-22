@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { AxiosResponse } from 'axios';
 import { FetchNodes } from '../Request';
-import { ICluster, IClusterDetail } from "../App"
+import { ICluster } from "../App"
 import { NodesComponent } from './Nodes';
 import { IMessageBarStyles, MessageBar, MessageBarType, Stack } from '@fluentui/react';
 import { nodesKey } from "../ClusterDetail";

@@ -1,5 +1,5 @@
 import { Component } from "react"
-import { Stack, Text, IDetailsListStyles, StackItem, Pivot, PivotItem, IStackItemStyles, } from '@fluentui/react';
+import { Stack, Text, StackItem, Pivot, PivotItem, IStackItemStyles, } from '@fluentui/react';
 import { ICondition, INode, INodeOverviewDetails, IResourceUsage, ITaint, IVolume} from "./NodesWrapper";
 import { contentStackStylesNormal } from "../App";
 import { InfoList, MultiInfoList } from "./InfoList"
@@ -66,7 +66,7 @@ const ObjectFromStringMap = (items: Map<string,string>) => {
 // TODO: Get Styling to look pretty
 const renderNodes = (nodes: INode[]) => {
     return nodes.map(node => {
-        return <PivotItem headerText={node.name}>
+        return <PivotItem key={node.name} headerText={node.name}>
                 <Text variant="xLarge">{node.name}</Text>
                 <Stack horizontal grow>
                     <Stack styles={stackItemStyles}>

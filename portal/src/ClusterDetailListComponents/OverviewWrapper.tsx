@@ -10,6 +10,7 @@ import { overviewKey } from "../ClusterDetail";
 const errorBarStyles: Partial<IMessageBarStyles> = { root: { marginBottom: 15 } }
 
 export function OverviewWrapper(props: {
+  clusterName: string
   currentCluster: ICluster
   detailPanelSelected: string
   loaded: boolean
@@ -60,7 +61,7 @@ export function OverviewWrapper(props: {
       setFetching("FETCHING")
       FetchClusterInfo(props.currentCluster).then(onData) // TODO: fetchClusterInfo accepts IClusterDetail
     }
-  }, [data, props.loaded])
+  }, [data, props.loaded, props.clusterName])
 
   return (
     <Stack>

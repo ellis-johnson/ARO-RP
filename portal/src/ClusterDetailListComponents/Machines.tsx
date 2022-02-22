@@ -32,7 +32,7 @@ machines: IMachine[]
 // TODO: Get Styling to look pretty
 const renderMachines = (machines: IMachine[]) => {
     return machines.map(machine => {
-        return <PivotItem headerText={machine.name}>
+        return <PivotItem key={machine.name} headerText={machine.name}>
                     <Stack styles={stackItemStyles}>
                         <StackItem>
                             <InfoList headers={MachineDetails} object={machine} title={machine.name!} titleSize="large"/>

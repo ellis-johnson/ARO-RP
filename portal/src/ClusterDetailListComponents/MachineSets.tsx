@@ -33,7 +33,7 @@ machineSets: IMachineSet[]
 // TODO: Get Styling to look pretty
 const renderMachineSets = (machineSets: IMachineSet[]) => {
     return machineSets.map(machineSet => {
-        return <PivotItem headerText={machineSet.name}>
+        return <PivotItem key={machineSet.name} headerText={machineSet.name}>
                     <Stack styles={stackItemStyles}>
                         <StackItem>
                             <InfoList headers={MachineSetDetails} object={machineSet} title={machineSet.name!} titleSize="large"/>

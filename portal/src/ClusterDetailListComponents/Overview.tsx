@@ -142,8 +142,8 @@ export class OverviewComponent extends Component<OverviewComponentProps, IOvervi
             return (
                 <Stack>
                 <Shimmer styles={headShimmerStyle} shimmerElements={headerShimmer} width="25%"></Shimmer>
-                {headerEntries.map(() => (
-                    <Shimmer styles={ShimmerStyle} shimmerElements={rowShimmer} width="75%"></Shimmer>
+                {headerEntries.map(header => (
+                    <Shimmer key={header[0]} styles={ShimmerStyle} shimmerElements={rowShimmer} width="75%"></Shimmer>
                     )
                 )}
                 </Stack>

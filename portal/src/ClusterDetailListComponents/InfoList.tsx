@@ -106,7 +106,7 @@ export const InfoList = (
 export const MultiInfoList = (
     props: any
 ) => {
-    return props.items.map((item: { [x: string]: any; }) => {
-        return <InfoList headers={props.headers} object={item} title={item[props.subProp]} titleSize={item[props.titleSize]}/>
+    return props.items.map((item: { [key: string]: any; }) => {
+        return <InfoList key={item.key} headers={props.headers} object={item} title={item[props.subProp]} titleSize={item[props.titleSize]}/>
     })
 }

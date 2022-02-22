@@ -49,7 +49,7 @@ export class ClusterDetailComponent extends Component<ClusterDetailComponentProp
       case "overview":
       {
         return (
-          <OverviewWrapper currentCluster={this.props.cluster!} detailPanelSelected={this.props.detailPanelVisible} loaded={this.props.isDataLoaded}/>
+          <OverviewWrapper clusterName= {this.props.item.name} currentCluster={this.props.cluster!} detailPanelSelected={this.props.detailPanelVisible} loaded={this.props.isDataLoaded}/>
         )
       }
       case "nodes":

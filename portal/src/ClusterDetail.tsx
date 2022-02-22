@@ -18,7 +18,7 @@ import {
 import { AxiosResponse } from "axios"
 import { FetchClusterInfo } from "./Request"
 import { ICluster, headerStyles } from "./App"
-import { Nav, INavLink, INavLinkGroup, INavStyles } from "@fluentui/react/lib/Nav"
+import { Nav, INavLink, INavStyles } from "@fluentui/react/lib/Nav"
 import { ClusterDetailComponent } from "./ClusterDetailList"
 import React from "react"
 
